@@ -1,0 +1,118 @@
+{
+  "name": "docthis",
+  "displayName": "Document This",
+  "description": "Automatically generates detailed JSDoc comments in TypeScript and JavaScript files.",
+  "version": "0.6.0",
+  "publisher": "joelday",
+  "icon": "images/icon.png",
+  "galleryBanner": {
+    "color": "#252627",
+    "theme": "dark"
+  },
+  "license": "MIT",
+  "licenseUrl": "LICENSE",
+  "engines": {
+    "vscode": "^1.16.0"
+  },
+  "categories": [
+    "Other",
+    "Snippets",
+    "Languages"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./out/src/extension",
+  "contributes": {
+    "commands": [
+      {
+        "command": "docthis.documentThis",
+        "title": "Document This"
+      },
+      {
+        "command": "docthis.traceTypeScriptSyntaxNode",
+        "title": "Trace TypeScript Syntax Node"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "docthis.documentThis"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "docthis.documentThis",
+        "key": "ctrl+alt+d ctrl+alt+d"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Document This configuration",
+      "properties": {
+        "docthis.includeTypes": {
+          "type": "boolean",
+          "default": true,
+          "description": "When enabled, type information is added to comment tags."
+        },
+        "docthis.includeMemberOfOnClassMembers": {
+          "type": "boolean",
+          "default": true,
+          "description": "When enabled, memberOf information is added to comment tags on class members."
+        },
+        "docthis.includeMemberOfOnInterfaceMembers": {
+          "type": "boolean",
+          "default": true,
+          "description": "When enabled, memberOf information is added to comment tags on interface members."
+        },
+        "docthis.includeDescriptionTag": {
+          "type": "boolean",
+          "default": false,
+          "description": "When enabled, JSDoc comments for functions and methods will include @description."
+        },
+        "docthis.enableHungarianNotationEvaluation": {
+          "type": "boolean",
+          "default": false,
+          "description": "When enabled, hungarian notation will be used as a type hint."
+        },
+        "docthis.inferTypesFromNames": {
+          "type": "boolean",
+          "default": false,
+          "description": "When enabled, will use names of params & methods as type hints."
+        },
+        "docthis.includeAuthorTag": {
+          "type": "boolean",
+          "default": false,
+          "description": "When enabled, will add the @author tag."
+        },
+        "docthis.authorName": {
+          "type": "string",
+          "default": "(Set the text for this tag by adding docthis.authorName to your settings file.)",
+          "description": "When docthis.includeAuthorTag is enabled, will add @author tag with this value."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "lint": "node ./node_modules/tslint/bin/tslint src/**/*.ts",
+    "compile": "npm run lint && tsc -p ./",
+    "postinstall": "node ./node_modules/vscode/bin/install"
+  },
+  "devDependencies": {
+    "@types/mocha": "^2.2.37",
+    "@types/node": "^6.0.59",
+    "tslint": "^4.3.1"
+  },
+  "dependencies": {
+    "typescript": "^2.2.0"
+  },
+  "bugs": {
+    "url": "https://github.com/joelday/vscode-docthis/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joelday/vscode-docthis"
+  }
+}
