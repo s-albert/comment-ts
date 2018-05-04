@@ -1,9 +1,9 @@
 {
-  "name": "docthis",
-  "displayName": "Document This",
-  "description": "Automatically generates detailed JSDoc comments in TypeScript and JavaScript files.",
-  "version": "0.6.0",
-  "publisher": "joelday",
+  "name": "comment-ts",
+  "displayName": "Comments in Typescript",
+  "description": "Automatically generates detailed JSDoc comments in TypeScript files.",
+  "version": "0.1.0",
+  "publisher": "salbert",
   "icon": "images/icon.png",
   "galleryBanner": {
     "color": "#252627",
@@ -16,8 +16,9 @@
   },
   "categories": [
     "Other",
-    "Snippets",
-    "Languages"
+    "Comment",
+    "Document",
+    "Typescript"
   ],
   "activationEvents": [
     "*"
@@ -26,24 +27,24 @@
   "contributes": {
     "commands": [
       {
-        "command": "docthis.documentThis",
+        "command": "comment-ts.documentThis",
         "title": "Document This"
       },
       {
-        "command": "docthis.traceTypeScriptSyntaxNode",
+        "command": "comment-ts.traceTypeScriptSyntaxNode",
         "title": "Trace TypeScript Syntax Node"
       }
     ],
     "menus": {
       "editor/context": [
         {
-          "command": "docthis.documentThis"
+          "command": "comment-ts.documentThis"
         }
       ]
     },
     "keybindings": [
       {
-        "command": "docthis.documentThis",
+        "command": "comment-ts.documentThis",
         "key": "ctrl+alt+d ctrl+alt+d"
       }
     ],
@@ -51,35 +52,10 @@
       "type": "object",
       "title": "Document This configuration",
       "properties": {
-        "docthis.includeTypes": {
-          "type": "boolean",
-          "default": true,
-          "description": "When enabled, type information is added to comment tags."
-        },
-        "docthis.includeMemberOfOnClassMembers": {
-          "type": "boolean",
-          "default": true,
-          "description": "When enabled, memberOf information is added to comment tags on class members."
-        },
-        "docthis.includeMemberOfOnInterfaceMembers": {
-          "type": "boolean",
-          "default": true,
-          "description": "When enabled, memberOf information is added to comment tags on interface members."
-        },
         "docthis.includeDescriptionTag": {
           "type": "boolean",
           "default": false,
           "description": "When enabled, JSDoc comments for functions and methods will include @description."
-        },
-        "docthis.enableHungarianNotationEvaluation": {
-          "type": "boolean",
-          "default": false,
-          "description": "When enabled, hungarian notation will be used as a type hint."
-        },
-        "docthis.inferTypesFromNames": {
-          "type": "boolean",
-          "default": false,
-          "description": "When enabled, will use names of params & methods as type hints."
         },
         "docthis.includeAuthorTag": {
           "type": "boolean",
@@ -106,7 +82,8 @@
     "tslint": "^4.3.1"
   },
   "dependencies": {
-    "typescript": "^2.2.0"
+    "typescript": "^2.2.0",
+    "vscode": "^1.1.17"
   },
   "bugs": {
     "url": "https://github.com/joelday/vscode-docthis/issues"
