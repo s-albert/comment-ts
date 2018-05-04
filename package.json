@@ -2,7 +2,7 @@
   "name": "comment-ts",
   "displayName": "Comments in Typescript",
   "description": "Automatically generates detailed JSDoc comments in TypeScript files.",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "publisher": "salbert",
   "icon": "images/icon.png",
   "galleryBanner": {
@@ -26,7 +26,7 @@
     "commands": [
       {
         "command": "comment-ts.documentThis",
-        "title": "Document This"
+        "title": "Comment..."
       },
       {
         "command": "comment-ts.traceTypeScriptSyntaxNode",
@@ -43,27 +43,32 @@
     "keybindings": [
       {
         "command": "comment-ts.documentThis",
-        "key": "ctrl+alt+d ctrl+alt+d"
+        "key": "ctrl+alt+c ctrl+alt+c"
       }
     ],
     "configuration": {
       "type": "object",
       "title": "Comment TS configuration",
       "properties": {
-        "docthis.includeDescriptionTag": {
+        "comment-ts.includeDescriptionTag": {
           "type": "boolean",
           "default": false,
           "description": "When enabled, JSDoc comments for functions and methods will include @description."
         },
-        "docthis.includeAuthorTag": {
+        "comment-ts.includeAuthorTag": {
           "type": "boolean",
           "default": false,
           "description": "When enabled, will add the @author tag."
         },
-        "docthis.authorName": {
+        "comment-ts.authorName": {
           "type": "string",
           "default": "(Set the text for this tag by adding docthis.authorName to your settings file.)",
-          "description": "When docthis.includeAuthorTag is enabled, will add @author tag with this value."
+          "description": "When comment-ts.includeAuthorTag is enabled, will add @author tag with this value."
+        },
+        "comment-ts.parseNames": {
+          "type": "boolean",
+          "default": false,
+          "description": "When comment-ts.parseNames is enabled, comments are generated from the name semantics."
         }
       }
     }
