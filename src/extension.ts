@@ -1,15 +1,10 @@
 import * as vs from "vscode";
-import * as path from "path";
 
 import { Documenter } from "./documenter";
 import { TextDocument, Position, CancellationToken, CompletionItem, CompletionItemKind, Range } from "vscode";
 
 const languages = [
-    "javascript",
-    "typescript",
-    "vue",
-    "javascriptreact",
-    "typescriptreact"
+    "typescript"
 ];
 
 let documenter: Documenter;
@@ -21,13 +16,12 @@ function lazyInitializeDocumenter() {
 }
 
 function languageIsSupported(document: vs.TextDocument) {
-    return (languages.findIndex(l => document.languageId === l) !== -1 ||
-        path.extname(document.fileName) === ".vue");
+    return (languages.findIndex(l => document.languageId === l) !== -1);
 }
 
 function verifyLanguageSupport(document: vs.TextDocument, commandName: string) {
     if (!languageIsSupported(document)) {
-        vs.window.showWarningMessage(`Sorry! '${commandName}' currently only supports JavaScript and TypeScript.`);
+        vs.window.showWarningMessage(`Sorry! '${commandName}' only supports TypeScript.`);
         return false;
     }
 
@@ -52,7 +46,7 @@ function runCommand(commandName: string, document: vs.TextDocument, implFunc: ()
 // Thanks, @mjbvz!
 class DocThisCompletionItem extends CompletionItem {
     constructor(document: TextDocument, position: Position) {
-        super("/** Document This */", CompletionItemKind.Snippet);
+        super("/** Comment... */", CompletionItemKind.Snippet);
         this.insertText = "";
         this.sortText = "\0";
 
@@ -65,8 +59,8 @@ class DocThisCompletionItem extends CompletionItem {
             position.translate(0, suffix ? suffix[0].length : 0));
 
         this.command = {
-            title: "Document This",
-            command: "docthis.documentThis",
+            title: "Comment TS",
+            command: "comment-ts.documentThis",
             arguments: [true]
         };
     }
@@ -89,15 +83,15 @@ export function activate(context: vs.ExtensionContext): void {
         },
         "/", "*"));
 
-    context.subscriptions.push(vs.commands.registerCommand("docthis.documentThis", (forCompletion: boolean) => {
-        const commandName = "Document This";
+    context.subscriptions.push(vs.commands.registerCommand("comment-ts.documentThis", (forCompletion: boolean) => {
+        const commandName = "Comment...";
 
         runCommand(commandName, vs.window.activeTextEditor.document, () => {
             documenter.documentThis(vs.window.activeTextEditor, commandName, forCompletion);
         });
     }));
 
-    context.subscriptions.push(vs.commands.registerCommand("docthis.traceTypeScriptSyntaxNode", () => {
+    context.subscriptions.push(vs.commands.registerCommand("comment-ts.traceTypeScriptSyntaxNode", () => {
         const commandName = "Trace TypeScript Syntax Node";
 
         runCommand(commandName, vs.window.activeTextEditor.document, () => {

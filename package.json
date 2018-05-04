@@ -16,9 +16,7 @@
   },
   "categories": [
     "Other",
-    "Comment",
-    "Document",
-    "Typescript"
+    "Formatters"
   ],
   "activationEvents": [
     "*"
@@ -50,7 +48,7 @@
     ],
     "configuration": {
       "type": "object",
-      "title": "Document This configuration",
+      "title": "Comment TS configuration",
       "properties": {
         "docthis.includeDescriptionTag": {
           "type": "boolean",
@@ -86,10 +84,10 @@
     "vscode": "^1.1.17"
   },
   "bugs": {
-    "url": "https://github.com/joelday/vscode-docthis/issues"
+    "url": "https://github.com/s-albert/comment-ts/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/joelday/vscode-docthis"
+    "url": "https://github.com/s-albert/comment-ts.git"
   }
 }

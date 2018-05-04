@@ -5,18 +5,6 @@ import * as utils from "./utilities";
 import { LanguageServiceHost } from "./languageServiceHost";
 import { Range } from "vscode";
 
-function includeTypes() {
-    return vs.workspace.getConfiguration().get("docthis.includeTypes", true);
-}
-
-function inferTypes() {
-    return vs.workspace.getConfiguration().get("docthis.inferTypesFromNames", false);
-}
-
-function enableHungarianNotationEvaluation() {
-    return vs.workspace.getConfiguration().get("docthis.enableHungarianNotationEvaluation", false);
-}
-
 export class Documenter implements vs.Disposable {
     private _languageServiceHost: LanguageServiceHost;
     private _services: ts.LanguageService;
@@ -195,7 +183,7 @@ export class Documenter implements vs.Disposable {
             sb.appendLine();
 
             // Jump a line after description free-type area before showing other tags
-            sb.appendLine();
+            // sb.appendLine();
         }
     }
 
@@ -246,7 +234,7 @@ export class Documenter implements vs.Disposable {
         this._emitDescriptionHeader(sb);
         this._emitAuthor(sb);
 
-        this._emitModifiers(sb, node);
+        // this._emitModifiers(sb, node);
 
         sb.append("@class");
 
@@ -256,7 +244,7 @@ export class Documenter implements vs.Disposable {
 
         sb.appendLine();
 
-        this._emitHeritageClauses(sb, node);
+        // this._emitHeritageClauses(sb, node);
         this._emitTypeParameters(sb, node);
     }
 
@@ -275,16 +263,7 @@ export class Documenter implements vs.Disposable {
             }
         }
 
-        this._emitModifiers(sb, node);
-
-        // JSDoc fails to emit documentation for arrow function syntax. (https://github.com/jsdoc3/jsdoc/issues/1100)
-        if (includeTypes()) {
-            if (node.type && node.type.getText().indexOf("=>") === -1) {
-                sb.appendLine(`@type ${ utils.formatTypeName(node.type.getText()) }`);
-            } else if (enableHungarianNotationEvaluation() && this._isHungarianNotation(node.name.getText())) {
-                sb.appendLine(`@type ${ this._getHungarianNotationType(node.name.getText()) }`);
-            }
-        }
+        // this._emitModifiers(sb, node);
 
         this._emitMemberOf(sb, node.parent);
     }
@@ -293,27 +272,27 @@ export class Documenter implements vs.Disposable {
         this._emitDescriptionHeader(sb);
         this._emitAuthor(sb);
 
-        this._emitModifiers(sb, node);
+        // this._emitModifiers(sb, node);
 
-        sb.appendLine(`@interface ${ node.name.getText() }`);
+        // sb.appendLine(`@interface ${ node.name.getText() }`);
 
-        this._emitHeritageClauses(sb, node);
+        // this._emitHeritageClauses(sb, node);
         this._emitTypeParameters(sb, node);
     }
 
     private _emitEnumDeclaration(sb: utils.SnippetStringBuilder, node: ts.EnumDeclaration) {
         this._emitDescriptionHeader(sb);
 
-        this._emitModifiers(sb, node);
+        // this._emitModifiers(sb, node);
 
-        sb.appendLine(`@enum {number}`);
+        sb.appendLine(`@enum `);
     }
 
     private _emitMethodDeclaration(sb: utils.SnippetStringBuilder, node: ts.MethodDeclaration | ts.FunctionDeclaration) {
         this._emitDescriptionHeader(sb);
         this._emitAuthor(sb);
 
-        this._emitModifiers(sb, node);
+        // this._emitModifiers(sb, node);
         this._emitTypeParameters(sb, node);
         this._emitParameters(sb, node);
         this._emitReturns(sb, node);
@@ -328,32 +307,15 @@ export class Documenter implements vs.Disposable {
         }
     }
 
-    private _isNameBooleanLike(name: string): boolean {
-        return /(?:is|has|can)[A-Z_]/.test(name);
-    }
-
-    private _isNameFunctionLike(name: string): boolean {
-        const fnNames = ["cb", "callback", "done", "next", "fn"];
-        return fnNames.indexOf(name) !== -1;
-    }
-
-    private _inferReturnTypeFromName(name: string): string {
-        if (this._isNameBooleanLike(name)) {
-            return "{boolean}";
-        }
-
-        return "";
-    }
-
     private _emitReturns(sb: utils.SnippetStringBuilder, node: ts.MethodDeclaration | ts.FunctionDeclaration | ts.FunctionExpression | ts.ArrowFunction) {
         if (utils.findNonVoidReturnInCurrentScope(node) || (node.type && node.type.getText() !== "void")) {
             sb.append("@returns");
-            if (includeTypes() && node.type) {
-                sb.append(" " + utils.formatTypeName(node.type.getText()));
-            }
-            else if (includeTypes() && inferTypes()) {
-                sb.append(" " + this._inferReturnTypeFromName(node.name.getText()));
-            }
+            // if (includeTypes() && node.type) {
+            //     sb.append(" " + utils.formatTypeName(node.type.getText()));
+            // }
+            // else if (includeTypes() && inferTypes()) {
+            //     sb.append(" " + this._inferReturnTypeFromName(node.name.getText()));
+            // }
 
             sb.append(" ");
             sb.appendSnippetTabstop();
@@ -361,18 +323,6 @@ export class Documenter implements vs.Disposable {
             sb.appendLine();
         }
 
-    }
-
-    private _inferParamTypeFromName(name: string): string {
-        if (this._isNameFunctionLike(name)) {
-            return "{function}";
-        }
-
-        if (this._isNameBooleanLike(name)) {
-            return "{boolean}";
-        }
-
-        return "{any}";
     }
 
     private _emitParameters(sb: utils.SnippetStringBuilder, node:
@@ -385,52 +335,14 @@ export class Documenter implements vs.Disposable {
         node.parameters.forEach(parameter => {
             const name = parameter.name.getText();
             const isOptional = parameter.questionToken || parameter.initializer;
-            const isArgs = !!parameter.dotDotDotToken;
-            const initializerValue = parameter.initializer ? parameter.initializer.getText() : null;
 
-            let typeName = "{any}";
-
-            if (includeTypes()) {
-                if (parameter.initializer && !parameter.type) {
-                    if (/^[0-9]/.test(initializerValue)) {
-                        typeName = "{number}";
-                    }
-                    else if (initializerValue.indexOf("\"") !== -1 ||
-                        initializerValue.indexOf("'") !== -1 ||
-                        initializerValue.indexOf("`") !== -1) {
-                        typeName = "{string}";
-                    }
-                    else if (initializerValue.indexOf("true") !== -1 ||
-                        initializerValue.indexOf("false") !== -1) {
-                        typeName = "{boolean}";
-                    }
-                }
-                else if (parameter.type) {
-                    typeName = utils.formatTypeName((isArgs ? "..." : "") + parameter.type.getFullText().trim());
-                }
-                else if (enableHungarianNotationEvaluation() && this._isHungarianNotation(name)) {
-                    typeName = this._getHungarianNotationType(name);
-                }
-                else if (inferTypes()) {
-                    typeName = this._inferParamTypeFromName(name);
-                }
-            }
-
-            sb.append("@param ");
-
-            if (includeTypes()) {
-                sb.append(typeName + " ");
-            }
+             sb.append("@param ");
 
             if (isOptional) {
                 sb.append("[");
             }
 
             sb.append(name);
-
-            if (parameter.initializer && typeName) {
-                sb.append("=" + parameter.initializer.getText());
-            }
 
             if (isOptional) {
                 sb.append("]");
@@ -441,24 +353,6 @@ export class Documenter implements vs.Disposable {
 
             sb.appendLine();
         });
-    }
-
-    private _isHungarianNotation(name: string): boolean {
-        return /^[abefimos][A-Z]/.test(name);
-    }
-
-    private _getHungarianNotationType(name: string): string {
-        switch (name.charAt(0)) {
-            case "a": return "{Array}";
-            case "b": return "{boolean}";
-            case "e": return "{Object}"; // Enumeration
-            case "f": return "{function}";
-            case "i": return "{number}";
-            case "m": return "{Object}"; // Map
-            case "o": return "{Object}";
-            case "s": return "{string}";
-            default: return "{any}";
-        }
     }
 
     private _emitConstructorDeclaration(sb: utils.SnippetStringBuilder, node: ts.ConstructorDeclaration) {
@@ -481,49 +375,6 @@ export class Documenter implements vs.Disposable {
             sb.append(`@template ${ parameter.name.getText() } `);
             sb.appendSnippetTabstop();
             sb.appendLine();
-        });
-    }
-
-    private _emitHeritageClauses(sb: utils.SnippetStringBuilder, node: ts.ClassLikeDeclaration | ts.InterfaceDeclaration) {
-        if (!node.heritageClauses || !includeTypes()) {
-            return;
-        }
-
-        node.heritageClauses.forEach((clause) => {
-            const heritageType = clause.token === ts.SyntaxKind.ExtendsKeyword ? "@extends" : "@implements";
-
-            clause.types.forEach(t => {
-                let tn = t.expression.getText();
-                if (t.typeArguments) {
-                    tn += "<";
-                    tn += t.typeArguments.map(a => a.getText()).join(", ");
-                    tn += ">";
-                }
-
-                sb.append(`${ heritageType } ${ utils.formatTypeName(tn) }`);
-                sb.appendLine();
-            });
-        });
-    }
-
-    private _emitModifiers(sb: utils.SnippetStringBuilder, node: ts.Node) {
-        if (!node.modifiers) {
-            return;
-        }
-
-        node.modifiers.forEach(modifier => {
-            switch (modifier.kind) {
-                case ts.SyntaxKind.ExportKeyword:
-                    sb.appendLine("@export"); return;
-                case ts.SyntaxKind.AbstractKeyword:
-                    sb.appendLine("@abstract"); return;
-                case ts.SyntaxKind.ProtectedKeyword:
-                    sb.appendLine("@protected"); return;
-                case ts.SyntaxKind.PrivateKeyword:
-                    sb.appendLine("@private"); return;
-                case ts.SyntaxKind.StaticKeyword:
-                    sb.appendLine("@static"); return;
-            }
         });
     }
 
