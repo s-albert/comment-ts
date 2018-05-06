@@ -46,7 +46,12 @@ export function fixWinPath(filePath: string) {
 
   return filePath;
 }
-
+/**
+ * Joins from
+ * @param str
+ * @param [from]
+ * @returns
+ */
 export function joinFrom(str: string[], from = 0): string {
   if (str && str.length >= from) {
     const newArray = str.slice(from);
@@ -56,23 +61,43 @@ export function joinFrom(str: string[], from = 0): string {
   }
 }
 
+/**
+ * Separates camelcase string
+ * @param str
+ * @param [separation]
+ * @returns
+ */
 export function separateCamelcaseString(str: string, separation = ' '): string {
   const regex = /[\s_]+|([a-z0-9])(?=[A-Z])/g;
   const result = str.replace(regex, '$1' + separation).toLowerCase();
   return result;
 }
 
+/**
+ * Trims underscores
+ * @param str
+ * @returns
+ */
 export function trimUnderscores(str: string): string {
-  const regex = new RegExp('_+([^_]*)_+', '');
-  return str.replace(regex, '$1');
+  const result = str.replace(/^_/, '');
+  return result;
 }
 
+/**
+ * Separates camelcase
+ * @param str
+ * @returns
+ */
 export function separateCamelcase(str: string): string[] {
   str = trimUnderscores(str.trim());
   const x = separateCamelcaseString(str, ';');
   return x.split(';');
 }
-
+/**
+ * Capitalizes first letter
+ * @param str
+ * @returns
+ */
 export function capitalizeFirstLetter(str: string): string {
   if (str && str !== '') {
     return str.charAt(0).toUpperCase() + str.slice(1);

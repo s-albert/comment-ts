@@ -11,7 +11,6 @@ export class Documenter implements vs.Disposable {
   private _languageServiceHost: LanguageServiceHost;
   private _services: ts.LanguageService;
   private _outputChannel: vs.OutputChannel;
-
   /**
    * Creates an instance of Documenter.
    */
@@ -21,7 +20,7 @@ export class Documenter implements vs.Disposable {
     this._services = ts.createLanguageService(this._languageServiceHost, ts.createDocumentRegistry());
   }
 
-private _emitDescription(sb: utils.SnippetStringBuilder, node: ts.Node) {
+  private _emitDescription(sb: utils.SnippetStringBuilder, node: ts.Node) {
     const parseNames = vs.workspace.getConfiguration().get('comment-ts.parseNames', false);
     if (!parseNames) {
       return;
@@ -46,7 +45,7 @@ private _emitDescription(sb: utils.SnippetStringBuilder, node: ts.Node) {
       case ts.SyntaxKind.FunctionDeclaration:
         const name = utils.findFirstChildOfKindDepthFirst(node, [ts.SyntaxKind.Identifier]).getText();
         const splitName = utils.separateCamelcase(name);
-        if (splitName && (splitName.length > 1) && (determineVerbs.indexOf(splitName[0]) >= 0)) {
+        if (splitName && splitName.length > 1 && determineVerbs.indexOf(splitName[0]) >= 0) {
           sb.append('Determines whether ');
           sb.append(utils.joinFrom(splitName, 1) + ' ');
           sb.append(splitName[0]);
@@ -68,14 +67,14 @@ private _emitDescription(sb: utils.SnippetStringBuilder, node: ts.Node) {
     }
   }
 
-/**
- * documents this
- * @param editor
- * @param commandName
- * @param forCompletion
- * @returns
- */
-documentThis(editor: vs.TextEditor, commandName: string, forCompletion: boolean) {
+  /**
+   * Documents this
+   * @param editor
+   * @param commandName
+   * @param forCompletion
+   * @returns
+   */
+  documentThis(editor: vs.TextEditor, commandName: string, forCompletion: boolean) {
     const sourceFile = this._getSourceFile(editor.document);
 
     const selection = editor.selection;
@@ -100,11 +99,12 @@ documentThis(editor: vs.TextEditor, commandName: string, forCompletion: boolean)
       this._showFailureMessage(commandName, 'at the current position');
     }
   }
-/**
- * traces node
- * @param editor
- */
-traceNode(editor: vs.TextEditor) {
+
+  /**
+   * Traces node
+   * @param editor
+   */
+  traceNode(editor: vs.TextEditor) {
     const selection = editor.selection;
     const caret = selection.start;
 
@@ -134,7 +134,7 @@ traceNode(editor: vs.TextEditor) {
     this._outputChannel.appendLine(sb.toString());
   }
 
-private _printNodeInfo(node: ts.Node, sourceFile: ts.SourceFile) {
+  private _printNodeInfo(node: ts.Node, sourceFile: ts.SourceFile) {
     const sb = new utils.StringBuilder();
     sb.append(`${node.getStart()} to ${node.getEnd()} --- (${node.kind}) ${(<any>ts).SyntaxKind[node.kind]}`);
 
@@ -375,12 +375,9 @@ private _printNodeInfo(node: ts.Node, sourceFile: ts.SourceFile) {
   ) {
     if (utils.findNonVoidReturnInCurrentScope(node) || (node.type && node.type.getText() !== 'void')) {
       sb.append('@returns');
-      // if (includeTypes() && node.type) {
-      //     sb.append(" " + utils.formatTypeName(node.type.getText()));
-      // }
-      // else if (includeTypes() && inferTypes()) {
-      //     sb.append(" " + this._inferReturnTypeFromName(node.name.getText()));
-      // }
+      if (node.type && node.type.getText() === 'boolean') {
+        sb.append(' True if , otherwise ');
+      }
 
       sb.append(' ');
       sb.appendSnippetTabstop();

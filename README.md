@@ -1,3 +1,5 @@
+[![Visual Studio Marketplace](https://img.shields.io/vscode-marketplace/v/ritwickdey.LiveServer.svg)](https://marketplace.visualstudio.com/items?itemName=salbert.comment-ts)
+
 # Comment TS
 "Comment TS" is a Visual Studio Code extension that automatically generates a template for JSDoc comments. It is adapted for TypeScript files. Typescript comes with a lot of language annotations, which should not be duplicated in the comments.
 
@@ -25,8 +27,10 @@ The comments will look like:
    */
 
   /**
-   * set UpperLimit
-   */
+  * Capitalizes first letter
+  * @param str
+  * @returns
+  */
 ```
 ## Settings
 * "comment-ts.includeDescriptionTag": Adds @description before your comment.
