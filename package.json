@@ -2,7 +2,7 @@
   "name": "comment-ts",
   "displayName": "Comments in Typescript",
   "description": "Automatically generates detailed JSDoc comments in TypeScript files.",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "publisher": "salbert",
   "icon": "images/icon.png",
   "galleryBanner": {
@@ -16,7 +16,8 @@
   },
   "categories": [
     "Other",
-    "Formatters"
+    "Formatters",
+    "Snippets"
   ],
   "activationEvents": [
     "*"

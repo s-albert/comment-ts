@@ -25,6 +25,12 @@ The comments will look like:
    */
 
   /**
+  * Checks spelling
+  * @param str
+  * @returns True if , otherwise
+  */
+
+  /**
   * Capitalizes first letter
   * @param str
   * @returns
@@ -34,7 +40,7 @@ The comments will look like:
 * "comment-ts.includeDescriptionTag": Adds @description before your comment.
 * "comment-ts.includeAuthorTag": Adds an @author tag to your comment.
 * "comment-ts.authorName": The text behind the @author tag.
-* "comment-ts.parseNames": Parses the names so as to generate comments. E.g. GetAccessor will produce "gets <name> ". SetAccessor will produce "sets <name> ".
+* "comment-ts.parseNames": Parses the names so as to generate comments. E.g. GetAccessor will produce "Gets <name> ". SetAccessor will produce "Sets <name> ",...
 
 ## Trace TypeScript Syntax Node
 Prints info about the node ancestry at a given caret position.

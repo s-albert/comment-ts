@@ -376,7 +376,7 @@ private _emitReturns(
     if (utils.findNonVoidReturnInCurrentScope(node) || (node.type && node.type.getText() !== 'void')) {
       sb.append('@returns');
       if (node.type && node.type.getText() === 'boolean') {
-        sb.append(' True if , otherwise');
+        sb.append(' true if , otherwise');
       }
 
       sb.append(' ');
