@@ -46,6 +46,7 @@ export function fixWinPath(filePath: string) {
 
   return filePath;
 }
+
 /**
  * Joins from
  * @param str

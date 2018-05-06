@@ -369,14 +369,14 @@ export class Documenter implements vs.Disposable {
     this._emitReturns(sb, node);
   }
 
-  private _emitReturns(
+private _emitReturns(
     sb: utils.SnippetStringBuilder,
     node: ts.MethodDeclaration | ts.FunctionDeclaration | ts.FunctionExpression | ts.ArrowFunction
   ) {
     if (utils.findNonVoidReturnInCurrentScope(node) || (node.type && node.type.getText() !== 'void')) {
       sb.append('@returns');
       if (node.type && node.type.getText() === 'boolean') {
-        sb.append(' True if , otherwise ');
+        sb.append(' True if , otherwise');
       }
 
       sb.append(' ');
