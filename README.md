@@ -2,7 +2,7 @@
 "Comment TS" is a Visual Studio Code extension that automatically generates a template for JSDoc comments. It is adapted for TypeScript files. Typescript comes with a lot of language annotations, which should not be duplicated in the comments.
 
 ## Tags
-Supports JSDoc and Closure Compiler tags: @description, @param, @returns, @template.
+Supported JSDoc tags: @description, @param, @returns, @template.
 
 ## Commands
 `Ctrl+Alt+C` and again `Ctrl+Alt+C`
@@ -32,7 +32,7 @@ The comments will look like:
 * "comment-ts.includeDescriptionTag": Adds @description before your comment.
 * "comment-ts.includeAuthorTag": Adds an @author tag to your comment.
 * "comment-ts.authorName": The text behind the @author tag.
-* "comment-ts.parseNames": Parses the names so as to generate comments. GetAccessor will produce "gets <name> ". SetAccessor will produce "sets <name> ". Much more could be done....
+* "comment-ts.parseNames": Parses the names so as to generate comments. E.g. GetAccessor will produce "gets <name> ". SetAccessor will produce "sets <name> ".
 
 ## Trace TypeScript Syntax Node
 Prints info about the node ancestry at a given caret position.

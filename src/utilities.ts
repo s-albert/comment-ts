@@ -47,6 +47,40 @@ export function fixWinPath(filePath: string) {
   return filePath;
 }
 
+export function joinFrom(str: string[], from = 0): string {
+  if (str && str.length >= from) {
+    const newArray = str.slice(from);
+    return newArray.join(' ');
+  } else {
+    return '';
+  }
+}
+
+export function separateCamelcaseString(str: string, separation = ' '): string {
+  const regex = /[\s_]+|([a-z0-9])(?=[A-Z])/g;
+  const result = str.replace(regex, '$1' + separation).toLowerCase();
+  return result;
+}
+
+export function trimUnderscores(str: string): string {
+  const regex = new RegExp('_+([^_]*)_+', '');
+  return str.replace(regex, '$1');
+}
+
+export function separateCamelcase(str: string): string[] {
+  str = trimUnderscores(str.trim());
+  const x = separateCamelcaseString(str, ';');
+  return x.split(';');
+}
+
+export function capitalizeFirstLetter(str: string): string {
+  if (str && str !== '') {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  } else {
+    return str;
+  }
+}
+
 export function findChildForPosition(node: ts.Node, position: number): ts.Node {
   let lastMatchingNode: ts.Node;
 

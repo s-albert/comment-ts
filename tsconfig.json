@@ -3,6 +3,12 @@
 		"module": "commonjs",
 		"target": "es6",
 		"outDir": "out",
+		"noImplicitAny": false,
+		"noImplicitThis": true,
+		"alwaysStrict": true,
+		"strictNullChecks": false,
+		"strictFunctionTypes": true,
+		"strictPropertyInitialization": false,
 		"lib": [
 			"es6"
 		],

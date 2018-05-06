@@ -5,6 +5,8 @@ import * as utils from './utilities';
 import { LanguageServiceHost } from './languageServiceHost';
 import { Range } from 'vscode';
 
+const determineVerbs = 'is;has;can;contains';
+
 export class Documenter implements vs.Disposable {
   private _languageServiceHost: LanguageServiceHost;
   private _services: ts.LanguageService;
@@ -19,7 +21,7 @@ export class Documenter implements vs.Disposable {
     this._services = ts.createLanguageService(this._languageServiceHost, ts.createDocumentRegistry());
   }
 
-  private _emitDescription(sb: utils.SnippetStringBuilder, node: ts.Node) {
+private _emitDescription(sb: utils.SnippetStringBuilder, node: ts.Node) {
     const parseNames = vs.workspace.getConfiguration().get('comment-ts.parseNames', false);
     if (!parseNames) {
       return;
@@ -27,27 +29,53 @@ export class Documenter implements vs.Disposable {
     switch (node.kind) {
       case ts.SyntaxKind.GetAccessor:
         const nameGet = utils.findFirstChildOfKindDepthFirst(node, [ts.SyntaxKind.Identifier]).getText();
-        sb.append('gets ');
-        sb.append(nameGet);
+        const splitNameGet = utils.separateCamelcaseString(nameGet);
+        sb.append('Gets ');
+        sb.append(splitNameGet);
         sb.appendSnippetTabstop();
         break;
       case ts.SyntaxKind.SetAccessor:
         const nameSet = utils.findFirstChildOfKindDepthFirst(node, [ts.SyntaxKind.Identifier]).getText();
-        sb.append('sets ');
-        sb.append(nameSet);
+        const splitNameSet = utils.separateCamelcaseString(nameSet);
+        sb.append('Sets ');
+        sb.append(splitNameSet);
+        sb.appendSnippetTabstop();
+        break;
+      case ts.SyntaxKind.MethodDeclaration:
+      case ts.SyntaxKind.PropertyDeclaration:
+      case ts.SyntaxKind.FunctionDeclaration:
+        const name = utils.findFirstChildOfKindDepthFirst(node, [ts.SyntaxKind.Identifier]).getText();
+        const splitName = utils.separateCamelcase(name);
+        if (splitName && (splitName.length > 1) && (determineVerbs.indexOf(splitName[0]) >= 0)) {
+          sb.append('Determines whether ');
+          sb.append(utils.joinFrom(splitName, 1) + ' ');
+          sb.append(splitName[0]);
+          sb.appendSnippetTabstop();
+        } else if (splitName && splitName.length > 1) {
+          sb.append(utils.capitalizeFirstLetter(splitName[0]) + 's ');
+          sb.append(utils.joinFrom(splitName, 1));
+          sb.appendSnippetTabstop();
+        }
+        break;
+      case ts.SyntaxKind.ClassDeclaration:
+      case ts.SyntaxKind.InterfaceDeclaration:
+      case ts.SyntaxKind.EnumDeclaration:
+        const className = utils.findFirstChildOfKindDepthFirst(node, [ts.SyntaxKind.Identifier]).getText();
+        const splitClassName = utils.separateCamelcaseString(className);
+        sb.append(utils.capitalizeFirstLetter(splitClassName));
         sb.appendSnippetTabstop();
         break;
     }
   }
 
-  /**
-   *
-   * @param editor
-   * @param commandName
-   * @param forCompletion
-   * @returns
-   */
-  documentThis(editor: vs.TextEditor, commandName: string, forCompletion: boolean) {
+/**
+ * documents this
+ * @param editor
+ * @param commandName
+ * @param forCompletion
+ * @returns
+ */
+documentThis(editor: vs.TextEditor, commandName: string, forCompletion: boolean) {
     const sourceFile = this._getSourceFile(editor.document);
 
     const selection = editor.selection;
@@ -72,8 +100,11 @@ export class Documenter implements vs.Disposable {
       this._showFailureMessage(commandName, 'at the current position');
     }
   }
-
-  traceNode(editor: vs.TextEditor) {
+/**
+ * traces node
+ * @param editor
+ */
+traceNode(editor: vs.TextEditor) {
     const selection = editor.selection;
     const caret = selection.start;
 
@@ -103,7 +134,7 @@ export class Documenter implements vs.Disposable {
     this._outputChannel.appendLine(sb.toString());
   }
 
-  private _printNodeInfo(node: ts.Node, sourceFile: ts.SourceFile) {
+private _printNodeInfo(node: ts.Node, sourceFile: ts.SourceFile) {
     const sb = new utils.StringBuilder();
     sb.append(`${node.getStart()} to ${node.getEnd()} --- (${node.kind}) ${(<any>ts).SyntaxKind[node.kind]}`);
 
