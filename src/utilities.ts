@@ -69,9 +69,26 @@ export function joinFrom(str: string[], from = 0): string {
  * @returns
  */
 export function separateCamelcaseString(str: string, separation = ' '): string {
+  str = trimUnderscores(str.trim());
   const regex = /[\s_]+|([a-z0-9])(?=[A-Z])/g;
   const result = str.replace(regex, '$1' + separation).toLowerCase();
   return result;
+}
+
+/**
+ * Separates camelcase noun string
+ * @param str
+ * @returns
+ */
+export function separateCamelcaseNounString(str: string): string {
+  str = separateCamelcaseString(str);
+  if (str) {
+    const i = str.indexOf(' ');
+    if (i > 0) {
+      str = str.substring(i + 1);
+    }
+  }
+  return str;
 }
 
 /**
@@ -83,17 +100,21 @@ export function trimUnderscores(str: string): string {
   const result = str.replace(/^_/, '');
   return result;
 }
-
 /**
- * Separates camelcase
+ * Separates camelcase string
  * @param str
+ * @param [cut]
  * @returns
  */
-export function separateCamelcase(str: string): string[] {
-  str = trimUnderscores(str.trim());
+export function separateCamelcase(str: string, cut: number = 0): string[] {
   const x = separateCamelcaseString(str, ';');
-  return x.split(';');
+  let result = x.split(';');
+  if (cut > 0) {
+    result.splice(0, cut);
+  }
+  return result;
 }
+
 /**
  * Capitalizes first letter
  * @param str

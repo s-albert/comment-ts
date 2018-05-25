@@ -26,11 +26,6 @@ interface SomeInterface {
     someFunction3: (someParam1: Date, someParam2: string, someParam3: boolean) => number;
 }
 
-/**
- * This description was written from the //* syntax
- *
- * @class SomeClass
- */
 class SomeClass {
     /**
      * Testing a property.
@@ -120,14 +115,7 @@ class SomeClass {
         return true;
     }
 
-    /**
-     * Testing with docthis.includeMemberOfOnClassMembers set to false
-     *
-     * @param {string} someParam1
-     * @param {number} someParam2
-     * @returns {boolean}
-     */
-    someFunction7(someParam1: string, someParam2: number): boolean {
+someFunction7(someParam1: string, someParam2: number): boolean {
         return true;
     }
 

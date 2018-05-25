@@ -4,16 +4,22 @@
 ## Tags
 Supported JSDoc tags: @description, @param, @returns, @template.
 
+## Conventions
+* Let method/function names start with a verb.
+* Use camelcase
+
 ## Commands
-`Ctrl+Alt+C` and again `Ctrl+Alt+C`
-or select 'Comment...' from your context menu
+To add a comment
+* press `Ctrl+Alt+C` twice
+* or select 'Comment...' from your context menu
+* or insert /** above the line of code.
 
 Generates comments for whatever the caret is on or inside of.
 
 The comments will look like:
 ```
   /**
-   *
+   * documents this
    * @param editor
    * @param commandName
    * @param forCompletion
@@ -27,7 +33,7 @@ The comments will look like:
   /**
   * Checks spelling
   * @param str
-  * @returns True if , otherwise
+  * @returns true if spelling
   */
 
   /**
@@ -46,6 +52,9 @@ The comments will look like:
 Prints info about the node ancestry at a given caret position.
 
 ## Documentation generator
+* [Compodoc](https://compodoc.github.io/website/)
+  Generate your Angular project documentation in seconds.
+
 * [TypeDoc](http://typedoc.org/guides/installation/)
 A documentation generator for TypeScript projects.
 

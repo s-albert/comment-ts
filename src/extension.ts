@@ -1,9 +1,8 @@
 import * as vs from 'vscode';
-
+import { CancellationToken, CompletionItem, CompletionItemKind, Position, Range, TextDocument } from 'vscode';
 import { Documenter } from './documenter';
-import { TextDocument, Position, CancellationToken, CompletionItem, CompletionItemKind, Range } from 'vscode';
 
-const languages = ['typescript'];
+const languages = ['typescript', 'tyspescriptreact'];
 
 let documenter: Documenter;
 
@@ -94,7 +93,7 @@ export function activate(context: vs.ExtensionContext): void {
 
   context.subscriptions.push(
     vs.commands.registerCommand('comment-ts.traceTypeScriptSyntaxNode', () => {
-      const commandName = 'Trace TypeScript Syntax Node';
+      const commandName = 'Trace Typescript Syntax Node';
 
       runCommand(commandName, vs.window.activeTextEditor.document, () => {
         documenter.traceNode(vs.window.activeTextEditor);

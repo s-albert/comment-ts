@@ -2,26 +2,27 @@
   "name": "comment-ts",
   "displayName": "Comments in Typescript",
   "description": "Automatically generates detailed JSDoc comments in TypeScript files.",
-  "version": "0.2.8",
+  "version": "0.3.8",
   "publisher": "salbert",
   "icon": "images/icon.png",
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "lint": "node ./node_modules/tslint/bin/tslint src/**/*.ts",
+    "compile": "npm run lint && tsc -p ./",
+    "publish": "vsce publish",
+    "postinstall": "node ./node_modules/vscode/bin/install"
+  },
+  "keywords": ["comment", "document", "typescript", "ts"],
   "galleryBanner": {
     "color": "#252627",
     "theme": "dark"
   },
   "license": "MIT",
-  "licenseUrl": "LICENSE",
   "engines": {
     "vscode": "^1.16.0"
   },
-  "categories": [
-    "Other",
-    "Formatters",
-    "Snippets"
-  ],
-  "activationEvents": [
-    "*"
-  ],
+  "categories": ["Other", "Formatters", "Snippets"],
+  "activationEvents": ["*"],
   "main": "./out/src/extension",
   "contributes": {
     "commands": [
@@ -37,7 +38,8 @@
     "menus": {
       "editor/context": [
         {
-          "command": "comment-ts.documentThis"
+          "command": "comment-ts.documentThis",
+          "when": "editorLangId == typescript"
         }
       ]
     },
@@ -68,18 +70,11 @@
         },
         "comment-ts.parseNames": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "When comment-ts.parseNames is enabled, comments are generated from the name semantics."
         }
       }
     }
-  },
-  "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "lint": "node ./node_modules/tslint/bin/tslint src/**/*.ts",
-    "compile": "npm run lint && tsc -p ./",
-    "publish": "vsce publish",
-    "postinstall": "node ./node_modules/vscode/bin/install"
   },
   "devDependencies": {
     "@types/mocha": "^2.2.37",

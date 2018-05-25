@@ -1,9 +1,8 @@
-import * as vs from 'vscode';
 import * as ts from 'typescript';
-import * as utils from './utilities';
-
-import { LanguageServiceHost } from './languageServiceHost';
+import * as vs from 'vscode';
 import { Range } from 'vscode';
+import { LanguageServiceHost } from './languageServiceHost';
+import * as utils from './utilities';
 
 const determineVerbs = 'is;has;can;contains';
 
@@ -11,8 +10,9 @@ export class Documenter implements vs.Disposable {
   private _languageServiceHost: LanguageServiceHost;
   private _services: ts.LanguageService;
   private _outputChannel: vs.OutputChannel;
+
   /**
-   * Creates an instance of Documenter.
+   * Creates an instance of documenter.
    */
   constructor() {
     this._languageServiceHost = new LanguageServiceHost();
@@ -21,49 +21,77 @@ export class Documenter implements vs.Disposable {
   }
 
   private _emitDescription(sb: utils.SnippetStringBuilder, node: ts.Node) {
-    const parseNames = vs.workspace.getConfiguration().get('comment-ts.parseNames', false);
+    const parseNames = vs.workspace.getConfiguration().get('comment-ts.parseNames', true);
     if (!parseNames) {
       return;
     }
+    const name = utils.findFirstChildOfKindDepthFirst(node, [ts.SyntaxKind.Identifier]).getText();
+
     switch (node.kind) {
-      case ts.SyntaxKind.GetAccessor:
-        const nameGet = utils.findFirstChildOfKindDepthFirst(node, [ts.SyntaxKind.Identifier]).getText();
-        const splitNameGet = utils.separateCamelcaseString(nameGet);
+      case ts.SyntaxKind.GetAccessor: {
+        const splitNameGet = utils.separateCamelcaseString(name);
         sb.append('Gets ');
         sb.append(splitNameGet);
         sb.appendSnippetTabstop();
         break;
-      case ts.SyntaxKind.SetAccessor:
-        const nameSet = utils.findFirstChildOfKindDepthFirst(node, [ts.SyntaxKind.Identifier]).getText();
-        const splitNameSet = utils.separateCamelcaseString(nameSet);
+      }
+      case ts.SyntaxKind.SetAccessor: {
+        const splitNameSet = utils.separateCamelcaseString(name);
         sb.append('Sets ');
         sb.append(splitNameSet);
         sb.appendSnippetTabstop();
         break;
-      case ts.SyntaxKind.MethodDeclaration:
-      case ts.SyntaxKind.PropertyDeclaration:
-      case ts.SyntaxKind.FunctionDeclaration:
-        const name = utils.findFirstChildOfKindDepthFirst(node, [ts.SyntaxKind.Identifier]).getText();
+      }
+      case ts.SyntaxKind.PropertyDeclaration: {
         const splitName = utils.separateCamelcase(name);
         if (splitName && splitName.length > 1 && determineVerbs.indexOf(splitName[0]) >= 0) {
           sb.append('Determines whether ');
           sb.append(utils.joinFrom(splitName, 1) + ' ');
           sb.append(splitName[0]);
-          sb.appendSnippetTabstop();
-        } else if (splitName && splitName.length > 1) {
-          sb.append(utils.capitalizeFirstLetter(splitName[0]) + 's ');
-          sb.append(utils.joinFrom(splitName, 1));
-          sb.appendSnippetTabstop();
+        } else if (splitName) {
+          sb.append(utils.capitalizeFirstLetter(splitName[0]) + ' ');
+          if (splitName.length > 1) {
+            sb.append(utils.joinFrom(splitName, 1));
+          }
+          const className = (<ts.ClassDeclaration>node.parent).name.getText();
+          sb.append(` of ${utils.separateCamelcaseString(className)}`);
         }
+        sb.appendSnippetTabstop();
         break;
+      }
+      case ts.SyntaxKind.MethodDeclaration:
+      case ts.SyntaxKind.FunctionExpression:
+      case ts.SyntaxKind.ArrowFunction:
+      case ts.SyntaxKind.FunctionDeclaration: {
+        const splitName = utils.separateCamelcase(name);
+        if (splitName && splitName.length > 1 && determineVerbs.indexOf(splitName[0]) >= 0) {
+          sb.append('Determines whether ');
+          sb.append(utils.joinFrom(splitName, 1) + ' ');
+          sb.append(splitName[0]);
+        } else if (splitName) {
+          let verb = utils.capitalizeFirstLetter(splitName[0]);
+          if (verb.endsWith('y')) {
+            verb = verb.substr(0, verb.length - 1) + 'ie';
+          }
+          sb.append(verb + 's ');
+          if (splitName.length > 1) {
+            sb.append(utils.joinFrom(splitName, 1));
+          } else {
+            const className = (<ts.ClassDeclaration>node.parent).name.getText();
+            sb.append(utils.separateCamelcaseString(className));
+          }
+        }
+        sb.appendSnippetTabstop();
+        break;
+      }
       case ts.SyntaxKind.ClassDeclaration:
       case ts.SyntaxKind.InterfaceDeclaration:
-      case ts.SyntaxKind.EnumDeclaration:
-        const className = utils.findFirstChildOfKindDepthFirst(node, [ts.SyntaxKind.Identifier]).getText();
-        const splitClassName = utils.separateCamelcaseString(className);
+      case ts.SyntaxKind.EnumDeclaration: {
+        const splitClassName = utils.separateCamelcaseString(name);
         sb.append(utils.capitalizeFirstLetter(splitClassName));
         sb.appendSnippetTabstop();
         break;
+      }
     }
   }
 
@@ -74,7 +102,7 @@ export class Documenter implements vs.Disposable {
    * @param forCompletion
    * @returns
    */
-  documentThis(editor: vs.TextEditor, commandName: string, forCompletion: boolean) {
+  documentThis(editor: vs.TextEditor, commandName: string, forCompletion: boolean): void {
     const sourceFile = this._getSourceFile(editor.document);
 
     const selection = editor.selection;
@@ -315,7 +343,7 @@ export class Documenter implements vs.Disposable {
     // }
     this._emitAuthor(sb);
 
-    sb.appendLine();
+    // sb.appendLine();
 
     // this._emitHeritageClauses(sb, node);
     this._emitTypeParameters(sb, node);
@@ -369,16 +397,37 @@ export class Documenter implements vs.Disposable {
     this._emitReturns(sb, node);
   }
 
-private _emitReturns(
+  /**
+   * Emits returns
+   * @param sb
+   * @param node
+   */
+  private _emitReturns(
     sb: utils.SnippetStringBuilder,
     node: ts.MethodDeclaration | ts.FunctionDeclaration | ts.FunctionExpression | ts.ArrowFunction
   ) {
     if (utils.findNonVoidReturnInCurrentScope(node) || (node.type && node.type.getText() !== 'void')) {
       sb.append('@returns');
-      if (node.type && node.type.getText() === 'boolean') {
-        sb.append(' true if , otherwise');
-      }
 
+      const parseNames = vs.workspace.getConfiguration().get('comment-ts.parseNames', true);
+      if (node.type && parseNames) {
+        const methodname = utils.separateCamelcaseNounString(node.name.getText());
+
+        switch (node.type.getText()) {
+          case 'boolean': {
+            sb.append(` true if ${methodname}`);
+            break;
+          }
+          case 'Date': {
+            sb.append(` date of ${methodname}`);
+            break;
+          }
+          default: {
+            sb.append(` ${methodname}`);
+            break;
+          }
+        }
+      }
       sb.append(' ');
       sb.appendSnippetTabstop();
 
@@ -423,7 +472,8 @@ private _emitReturns(
   }
 
   private _emitConstructorDeclaration(sb: utils.SnippetStringBuilder, node: ts.ConstructorDeclaration) {
-    sb.appendSnippetPlaceholder(`Creates an instance of ${(<ts.ClassDeclaration>node.parent).name.getText()}.`);
+    const className = (<ts.ClassDeclaration>node.parent).name.getText();
+    sb.appendSnippetPlaceholder(`Creates an instance of ${utils.separateCamelcaseString(className)}.`);
     sb.appendLine();
     this._emitAuthor(sb);
 
