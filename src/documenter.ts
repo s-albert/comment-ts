@@ -3,8 +3,12 @@ import * as vs from 'vscode';
 import { Range } from 'vscode';
 import { LanguageServiceHost } from './languageServiceHost';
 import * as utils from './utilities';
+import { SnippetStringBuilder } from './snippet-string-builder';
+import { StringBuilder } from './string-builder';
 
 const determineVerbs = 'is;has;can;contains';
+const noVerb = 'on;after';
+const ignorePrefix = 'ng';
 
 export class Documenter implements vs.Disposable {
   private _languageServiceHost: LanguageServiceHost;
@@ -20,7 +24,7 @@ export class Documenter implements vs.Disposable {
     this._services = ts.createLanguageService(this._languageServiceHost, ts.createDocumentRegistry());
   }
 
-  private _emitDescription(sb: utils.SnippetStringBuilder, node: ts.Node) {
+  private _emitDescription(sb: SnippetStringBuilder, node: ts.Node) {
     const parseNames = vs.workspace.getConfiguration().get('comment-ts.parseNames', true);
     if (!parseNames) {
       return;
@@ -64,21 +68,30 @@ export class Documenter implements vs.Disposable {
       case ts.SyntaxKind.ArrowFunction:
       case ts.SyntaxKind.FunctionDeclaration: {
         const splitName = utils.separateCamelcase(name);
-        if (splitName && splitName.length > 1 && determineVerbs.indexOf(splitName[0]) >= 0) {
+        if (splitName && splitName.length > 1 && determineVerbs.indexOf(splitName[0].toLowerCase()) >= 0) {
           sb.append('Determines whether ');
           sb.append(utils.joinFrom(splitName, 1) + ' ');
           sb.append(splitName[0]);
         } else if (splitName) {
-          let verb = utils.capitalizeFirstLetter(splitName[0]);
-          if (verb.endsWith('y')) {
-            verb = verb.substr(0, verb.length - 1) + 'ie';
+          if (ignorePrefix.indexOf(splitName[0].toLowerCase()) >= 0) {
+            splitName.splice(0, 1);
           }
-          sb.append(verb + 's ');
-          if (splitName.length > 1) {
-            sb.append(utils.joinFrom(splitName, 1));
-          } else {
-            const className = (<ts.ClassDeclaration>node.parent).name.getText();
-            sb.append(utils.separateCamelcaseString(className));
+          if (splitName.length > 0) {
+            let verb = utils.capitalizeFirstLetter(splitName[0]);
+            if (noVerb.indexOf(splitName[0].toLowerCase()) >= 0) {
+              sb.append(verb);
+            } else {
+              if (verb.endsWith('y')) {
+                verb = verb.substr(0, verb.length - 1) + 'ie';
+              }
+              sb.append(verb + 's ');
+            }
+            if (splitName.length > 1) {
+              sb.append(utils.joinFrom(splitName, 1));
+            } else {
+              const className = (<ts.ClassDeclaration>node.parent).name.getText();
+              sb.append(utils.separateCamelcaseString(className));
+            }
           }
         }
         sb.appendSnippetTabstop();
@@ -95,18 +108,34 @@ export class Documenter implements vs.Disposable {
     }
   }
 
+  private currentComments = new Map<string, string>();
+
   /**
-   * Documents this
+   * Documents this function
+   * more doku
+   * and even more 7777
+   * @param editor hurra 4444
+   * @param commandName 111 6666
+   * @param forCompletion 222 77777
+   * @returns ret this 55555 uuuu
+  /**
+   * Documents this function
+   * more doku
+   * and even more 7777
    * @param editor
    * @param commandName
    * @param forCompletion
-   * @returns
+   * @returns ret this 55555 uuuu
    */
   documentThis(editor: vs.TextEditor, commandName: string, forCompletion: boolean): void {
     const sourceFile = this._getSourceFile(editor.document);
 
     const selection = editor.selection;
     const caret = selection.start;
+
+    if (vs.workspace.getConfiguration().get('comment-ts.replaceComments', false)) {
+      this.currentComments = utils.createMap(editor, selection);
+    }
 
     const position = ts.getPositionOfLineAndCharacter(sourceFile, caret.line, caret.character);
     const node = utils.findChildForPosition(sourceFile, position);
@@ -117,7 +146,7 @@ export class Documenter implements vs.Disposable {
       return;
     }
 
-    const sb = new utils.SnippetStringBuilder();
+    const sb = new SnippetStringBuilder();
 
     const docLocation = this._documentNode(sb, documentNode, sourceFile);
 
@@ -149,7 +178,7 @@ export class Documenter implements vs.Disposable {
       parent = parent.parent;
     }
 
-    const sb = new utils.StringBuilder();
+    const sb = new StringBuilder();
     nodes.reverse().forEach((n, i) => {
       sb.appendLine(n);
     });
@@ -162,8 +191,14 @@ export class Documenter implements vs.Disposable {
     this._outputChannel.appendLine(sb.toString());
   }
 
+  /**
+   * Prints node info
+   * @param node
+   * @param sourceFile
+   * @returns
+   */
   private _printNodeInfo(node: ts.Node, sourceFile: ts.SourceFile) {
-    const sb = new utils.StringBuilder();
+    const sb = new StringBuilder();
     sb.append(`${node.getStart()} to ${node.getEnd()} --- (${node.kind}) ${(<any>ts).SyntaxKind[node.kind]}`);
 
     if (node.parent) {
@@ -191,7 +226,7 @@ export class Documenter implements vs.Disposable {
   }
 
   private _insertDocumentation(
-    sb: utils.SnippetStringBuilder,
+    sb: SnippetStringBuilder,
     location: ts.LineAndCharacter,
     editor: vs.TextEditor,
     forCompletion: boolean
@@ -225,7 +260,7 @@ export class Documenter implements vs.Disposable {
     return sourceFile;
   }
 
-  private _documentNode(sb: utils.SnippetStringBuilder, node: ts.Node, sourceFile: ts.SourceFile): ts.LineAndCharacter {
+  private _documentNode(sb: SnippetStringBuilder, node: ts.Node, sourceFile: ts.SourceFile): ts.LineAndCharacter {
     switch (node.kind) {
       case ts.SyntaxKind.ClassDeclaration:
         this._emitClassDeclaration(sb, <ts.ClassDeclaration>node);
@@ -265,24 +300,21 @@ export class Documenter implements vs.Disposable {
     return ts.getLineAndCharacterOfPosition(sourceFile, node.getStart());
   }
 
-  private _emitDescriptionHeader(sb: utils.SnippetStringBuilder, node: ts.Node) {
+  private _emitDescriptionHeader(sb: SnippetStringBuilder, node: ts.Node) {
     if (vs.workspace.getConfiguration().get('comment-ts.includeDescriptionTag', false)) {
       sb.append('@description ');
-      sb.appendSnippetTabstop();
-      this._emitDescription(sb, node);
-      sb.appendLine();
-    } else {
-      // We don't want description tag, probably because we want to free type the description. So add space for that.
-      sb.appendSnippetTabstop();
-      this._emitDescription(sb, node);
-      sb.appendLine();
-
-      // Jump a line after description free-type area before showing other tags
-      // sb.appendLine();
     }
+    if (this.currentComments.has('@description')) {
+      const text = this.currentComments.get('@description');
+      sb.append(text);
+    } else {
+      sb.appendSnippetTabstop();
+      this._emitDescription(sb, node);
+    }
+    sb.appendLine();
   }
 
-  private _emitAuthor(sb: utils.SnippetStringBuilder) {
+  private _emitAuthor(sb: SnippetStringBuilder) {
     if (vs.workspace.getConfiguration().get('comment-ts.includeAuthorTag', false)) {
       let author: string = vs.workspace.getConfiguration().get('comment-ts.authorName', '');
       sb.append('@author ' + author);
@@ -291,11 +323,7 @@ export class Documenter implements vs.Disposable {
     }
   }
 
-  private _emitVariableDeclaration(
-    sb: utils.SnippetStringBuilder,
-    node: ts.VariableDeclaration,
-    sourceFile: ts.SourceFile
-  ) {
+  private _emitVariableDeclaration(sb: SnippetStringBuilder, node: ts.VariableDeclaration, sourceFile: ts.SourceFile) {
     for (const child of node.getChildren()) {
       const result = this._documentNode(sb, child, sourceFile);
       if (result) {
@@ -307,7 +335,7 @@ export class Documenter implements vs.Disposable {
   }
 
   private _emitFunctionExpression(
-    sb: utils.SnippetStringBuilder,
+    sb: SnippetStringBuilder,
     node: ts.FunctionExpression | ts.ArrowFunction,
     sourceFile: ts.SourceFile
   ) {
@@ -336,7 +364,7 @@ export class Documenter implements vs.Disposable {
     return ts.getLineAndCharacterOfPosition(sourceFile, targetNode.getStart());
   }
 
-  private _emitClassDeclaration(sb: utils.SnippetStringBuilder, node: ts.ClassDeclaration) {
+  private _emitClassDeclaration(sb: SnippetStringBuilder, node: ts.ClassDeclaration) {
     this._emitDescriptionHeader(sb, node);
     // if (node.name) {
     //   sb.append(` ${node.name.getText()}`);
@@ -349,10 +377,7 @@ export class Documenter implements vs.Disposable {
     this._emitTypeParameters(sb, node);
   }
 
-  private _emitPropertyDeclaration(
-    sb: utils.SnippetStringBuilder,
-    node: ts.PropertyDeclaration | ts.AccessorDeclaration
-  ) {
+  private _emitPropertyDeclaration(sb: SnippetStringBuilder, node: ts.PropertyDeclaration | ts.AccessorDeclaration) {
     this._emitDescriptionHeader(sb, node);
 
     // if (node.kind === ts.SyntaxKind.GetAccessor) {
@@ -367,7 +392,7 @@ export class Documenter implements vs.Disposable {
     // }
   }
 
-  private _emitInterfaceDeclaration(sb: utils.SnippetStringBuilder, node: ts.InterfaceDeclaration) {
+  private _emitInterfaceDeclaration(sb: SnippetStringBuilder, node: ts.InterfaceDeclaration) {
     this._emitDescriptionHeader(sb, node);
     this._emitAuthor(sb);
 
@@ -379,7 +404,7 @@ export class Documenter implements vs.Disposable {
     this._emitTypeParameters(sb, node);
   }
 
-  private _emitEnumDeclaration(sb: utils.SnippetStringBuilder, node: ts.EnumDeclaration) {
+  private _emitEnumDeclaration(sb: SnippetStringBuilder, node: ts.EnumDeclaration) {
     this._emitDescriptionHeader(sb, node);
 
     // this._emitModifiers(sb, node);
@@ -387,7 +412,7 @@ export class Documenter implements vs.Disposable {
     // sb.appendLine(`@enum `);
   }
 
-  private _emitMethodDeclaration(sb: utils.SnippetStringBuilder, node: ts.MethodDeclaration | ts.FunctionDeclaration) {
+  private _emitMethodDeclaration(sb: SnippetStringBuilder, node: ts.MethodDeclaration | ts.FunctionDeclaration) {
     this._emitDescriptionHeader(sb, node);
     this._emitAuthor(sb);
 
@@ -403,32 +428,37 @@ export class Documenter implements vs.Disposable {
    * @param node
    */
   private _emitReturns(
-    sb: utils.SnippetStringBuilder,
+    sb: SnippetStringBuilder,
     node: ts.MethodDeclaration | ts.FunctionDeclaration | ts.FunctionExpression | ts.ArrowFunction
   ) {
     if (utils.findNonVoidReturnInCurrentScope(node) || (node.type && node.type.getText() !== 'void')) {
-      sb.append('@returns');
+      sb.append('@returns ');
 
-      const parseNames = vs.workspace.getConfiguration().get('comment-ts.parseNames', true);
-      if (node.type && parseNames) {
-        const methodname = utils.separateCamelcaseNounString(node.name.getText());
+      if (this.currentComments.has('@returns')) {
+        const text = this.currentComments.get('@returns');
+        sb.append(text);
+      } else {
+        const parseNames = vs.workspace.getConfiguration().get('comment-ts.parseNames', true);
+        if (node.type && parseNames) {
+          const methodname = utils.separateCamelcaseNounString(node.name.getText());
 
-        switch (node.type.getText()) {
-          case 'boolean': {
-            sb.append(` true if ${methodname}`);
-            break;
-          }
-          case 'Date': {
-            sb.append(` date of ${methodname}`);
-            break;
-          }
-          default: {
-            sb.append(` ${methodname}`);
-            break;
+          switch (node.type.getText()) {
+            case 'boolean': {
+              sb.append(`true if ${methodname}`);
+              break;
+            }
+            case 'Date': {
+              sb.append(`date of ${methodname}`);
+              break;
+            }
+            default: {
+              sb.append(`${methodname}`);
+              break;
+            }
           }
         }
+        sb.append(' ');
       }
-      sb.append(' ');
       sb.appendSnippetTabstop();
 
       sb.appendLine();
@@ -436,7 +466,7 @@ export class Documenter implements vs.Disposable {
   }
 
   private _emitParameters(
-    sb: utils.SnippetStringBuilder,
+    sb: SnippetStringBuilder,
     node:
       | ts.MethodDeclaration
       | ts.FunctionDeclaration
@@ -465,13 +495,19 @@ export class Documenter implements vs.Disposable {
       }
 
       sb.append(' ');
+
+      if (this.currentComments.has(name)) {
+        const text = this.currentComments.get(name);
+        sb.append(text);
+      }
+
       sb.appendSnippetTabstop();
 
       sb.appendLine();
     });
   }
 
-  private _emitConstructorDeclaration(sb: utils.SnippetStringBuilder, node: ts.ConstructorDeclaration) {
+  private _emitConstructorDeclaration(sb: SnippetStringBuilder, node: ts.ConstructorDeclaration) {
     const className = (<ts.ClassDeclaration>node.parent).name.getText();
     sb.appendSnippetPlaceholder(`Creates an instance of ${utils.separateCamelcaseString(className)}.`);
     sb.appendLine();
@@ -481,7 +517,7 @@ export class Documenter implements vs.Disposable {
   }
 
   private _emitTypeParameters(
-    sb: utils.SnippetStringBuilder,
+    sb: SnippetStringBuilder,
     node:
       | ts.ClassLikeDeclaration
       | ts.InterfaceDeclaration

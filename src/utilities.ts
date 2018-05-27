@@ -20,6 +20,64 @@ const supportedNodeKinds = [
   ts.SyntaxKind.VariableDeclaration
 ];
 
+export function indexOfBlank(s: string, pos = 0): number {
+  return s.substr(pos).search(/^\s+$/);
+}
+
+/**
+ * Creates map
+ * @param editor
+ * @param selection
+ * @returns map
+ */
+export function createMap(editor: vs.TextEditor, selection: vs.Selection): Map<string, string> {
+  const startLine = selection.start.line;
+  const endLine = selection.end.line;
+
+  const map = new Map<string, string>();
+
+  for (let currentLine = startLine; currentLine <= endLine; currentLine++) {
+    const line = editor.document.lineAt(currentLine);
+    const firstChar = line.firstNonWhitespaceCharacterIndex;
+    const lineText = line.text;
+    if (lineText.substr(firstChar, 2) === '* ') {
+      const param = lineText.indexOf('@param');
+      if (param > 0) {
+        let parse = lineText.substring(param + '@param'.length);
+        parse = parse.trim();
+        const blank = indexOfBlank(parse);
+        if (blank > 0) {
+          map.set(parse.substring(0, blank), parse.substring(blank).trim());
+        }
+        continue;
+      }
+      const ret = lineText.indexOf('@returns');
+      if (ret > 0) {
+        let parse = lineText.substring(ret + '@returns'.length);
+        map.set('@returns', parse.trim());
+        continue;
+      }
+      const description = lineText.indexOf('@description');
+      if (ret > 0) {
+        let parse = lineText.substring(description + '@description'.length);
+        map.set('@description', parse.trim());
+        continue;
+      }
+      const parse = lineText.substring(firstChar + 2).trim();
+      if (parse.length > 0) {
+        if (map.has('@description')) {
+          const currentText = map.get('@description');
+          map.set('@description', `${currentText}\n${parse}`);
+        } else {
+          map.set('@description', parse);
+        }
+      }
+    }
+  }
+
+  return map;
+}
+
 export function emptyArray(arr: any[]) {
   while (arr.length > 0) {
     arr.pop();
@@ -251,22 +309,6 @@ export function findFirstParent(node: ts.Node, kinds = supportedNodeKinds) {
   return null;
 }
 
-export class StringBuilder {
-  private _text = '';
-
-  append(text = '') {
-    this._text += text.toString();
-  }
-
-  appendLine(text = '') {
-    this._text += text.toString() + '\n';
-  }
-
-  toString() {
-    return this._text;
-  }
-}
-
 export function formatTypeName(typeName: string) {
   typeName = typeName.trim();
 
@@ -283,57 +325,4 @@ export function formatTypeName(typeName: string) {
   }
 
   return '{' + typeName + '}';
-}
-
-export class SnippetStringBuilder {
-  private readonly _snippet = new vs.SnippetString();
-
-  append(value: string) {
-    this._snippet.appendText(value.toString());
-
-    return this;
-  }
-
-  appendLine(value: string = '') {
-    this.append(value.toString() + '\n');
-    return this;
-  }
-
-  appendSnippetTabstop(index?: number) {
-    this._snippet.appendTabstop(index);
-
-    return this;
-  }
-
-  appendSnippetPlaceholder(value: string | ((snippet: vs.SnippetString) => any), index?: number) {
-    this._snippet.appendPlaceholder(value, index);
-
-    return this;
-  }
-
-  appendSnippetVariable(name: string, defaultValue: string | ((snippet: vs.SnippetString) => any)) {
-    this._snippet.appendVariable(name, defaultValue);
-
-    return this;
-  }
-
-  toCommentValue() {
-    let sb = new StringBuilder();
-
-    sb.appendLine('/**');
-
-    const lines = this._snippet.value.split('\n');
-    lines.forEach((line, i) => {
-      if (line === '' && i === lines.length - 1) {
-        return;
-      }
-
-      sb.append(' * ');
-      sb.appendLine(line);
-    });
-
-    sb.appendLine(' */');
-
-    return new vs.SnippetString(sb.toString());
-  }
 }
