@@ -7,7 +7,7 @@ import { SnippetStringBuilder } from './snippet-string-builder';
 import { StringBuilder } from './string-builder';
 
 const determineVerbs = 'is;has;can;contains';
-const noVerb = 'on;after';
+const noVerb = 'on;after;before';
 const ignorePrefix = 'ng';
 
 export class Documenter implements vs.Disposable {
@@ -79,7 +79,7 @@ export class Documenter implements vs.Disposable {
           if (splitName.length > 0) {
             let verb = utils.capitalizeFirstLetter(splitName[0]);
             if (noVerb.indexOf(splitName[0].toLowerCase()) >= 0) {
-              sb.append(verb);
+              sb.append(verb + ' ');
             } else {
               if (verb.endsWith('y')) {
                 verb = verb.substr(0, verb.length - 1) + 'ie';
