@@ -1,10 +1,10 @@
 # Comment TS
 "Comment TS" is a Visual Studio Code extension that automatically generates a template for JSDoc comments. It is adapted for TypeScript files. Typescript comes with a lot of language annotations, which should not be duplicated in the comments.
 
-This svoids warnings like:
-warning TS0: @static annotations are redundant with TypeScript equivalents
-warning TS0: @private annotations are redundant with TypeScript equivalents
-warning TS0: the type annotation on @param is redundant with its TypeScript type, remove the {...} part
+And to avoid warnings like:
+* warning TS0: @static annotations are redundant with TypeScript equivalents
+* warning TS0: @private annotations are redundant with TypeScript equivalents
+* warning TS0: the type annotation on @param is redundant with its TypeScript type, remove the {...} part
 
 ## Tags
 Supported JSDoc tags: @description, @param, @returns, @template.

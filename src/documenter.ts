@@ -8,7 +8,7 @@ import { StringBuilder } from './string-builder';
 
 const determineVerbs = 'is;has;can;contains';
 const noVerb = 'on;after;before';
-const ignorePrefix = 'ng';
+const postfixVerb = 'ing;ed';
 
 export class Documenter implements vs.Disposable {
   private _languageServiceHost: LanguageServiceHost;
@@ -24,7 +24,13 @@ export class Documenter implements vs.Disposable {
     this._services = ts.createLanguageService(this._languageServiceHost, ts.createDocumentRegistry());
   }
 
-  private _emitDescription(sb: SnippetStringBuilder, node: ts.Node) {
+/**
+ * Emits description
+ * @param sb
+ * @param node
+ * @returns
+ */
+private _emitDescription(sb: SnippetStringBuilder, node: ts.Node) {
     const parseNames = vs.workspace.getConfiguration().get('comment-ts.parseNames', true);
     if (!parseNames) {
       return;
@@ -73,24 +79,35 @@ export class Documenter implements vs.Disposable {
           sb.append(utils.joinFrom(splitName, 1) + ' ');
           sb.append(splitName[0]);
         } else if (splitName) {
-          if (ignorePrefix.indexOf(splitName[0].toLowerCase()) >= 0) {
-            splitName.splice(0, 1);
-          }
           if (splitName.length > 0) {
-            let verb = utils.capitalizeFirstLetter(splitName[0]);
             if (noVerb.indexOf(splitName[0].toLowerCase()) >= 0) {
+              // no verb
+              const verb = utils.capitalizeFirstLetter(splitName[0]);
               sb.append(verb + ' ');
-            } else {
-              if (verb.endsWith('y')) {
-                verb = verb.substr(0, verb.length - 1) + 'ie';
+            } else if (splitName[0].length <= 2) {
+              // delete prefix like ng
+              splitName.splice(0, 1);
+            } else if (splitName.length > 0) {
+              // verb
+              let verb = utils.capitalizeFirstLetter(splitName[0]);
+              if (!this.endsWithOneOf(verb, postfixVerb)) { // check if verb with s
+                if (verb.endsWith('y')) {
+                  // convert y > ie
+                  verb = verb.substr(0, verb.length - 1) + 'ie';
+                }
+                sb.append(verb + 's ');
               }
-              sb.append(verb + 's ');
             }
             if (splitName.length > 1) {
+              // more than one word, append rest
               sb.append(utils.joinFrom(splitName, 1));
-            } else {
+            } else if (splitName.length === 1) {
+              // if only one word append classname
               const className = (<ts.ClassDeclaration>node.parent).name.getText();
               sb.append(utils.separateCamelcaseString(className));
+            } else {
+              // no word, take whole name
+              sb.append(utils.capitalizeFirstLetter(name));
             }
           }
         }
@@ -108,6 +125,11 @@ export class Documenter implements vs.Disposable {
     }
   }
 
+  private endsWithOneOf(verb: string, postfix: string): boolean {
+    const postfixes = postfix.split(';');
+    return postfixes.findIndex((p, index, arr) => verb.endsWith(p)) >= 0;
+  }
+
   private currentComments = new Map<string, string>();
 
   /**
@@ -117,14 +139,6 @@ export class Documenter implements vs.Disposable {
    * @param editor hurra 4444
    * @param commandName 111 6666
    * @param forCompletion 222 77777
-   * @returns ret this 55555 uuuu
-  /**
-   * Documents this function
-   * more doku
-   * and even more 7777
-   * @param editor
-   * @param commandName
-   * @param forCompletion
    * @returns ret this 55555 uuuu
    */
   documentThis(editor: vs.TextEditor, commandName: string, forCompletion: boolean): void {
