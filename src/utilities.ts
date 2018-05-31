@@ -21,7 +21,7 @@ const supportedNodeKinds = [
 ];
 
 export function indexOfBlank(s: string, pos = 0): number {
-  return s.substr(pos).search(/^\s+$/);
+  return s.substr(pos).search(/\s/g);
 }
 
 /**
@@ -47,7 +47,7 @@ export function createMap(editor: vs.TextEditor, selection: vs.Selection): Map<s
         parse = parse.trim();
         const blank = indexOfBlank(parse);
         if (blank > 0) {
-          map.set(parse.substring(0, blank), parse.substring(blank).trim());
+          map.set(parse.substring(0, blank).trim(), parse.substring(blank).trim());
         }
         continue;
       }

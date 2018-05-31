@@ -6,8 +6,8 @@ import * as utils from './utilities';
 import { SnippetStringBuilder } from './snippet-string-builder';
 import { StringBuilder } from './string-builder';
 
-const determineVerbs = 'is;has;can;contains';
-const noVerb = 'on;after;before';
+const determineVerbs = 'is;has;have;can;could;contains';
+const noVerb = 'on;after;before;goto;do;must;should;shall;will;would;next;previous';
 const postfixVerb = 'ing;ed';
 
 export class Documenter implements vs.Disposable {
@@ -24,13 +24,20 @@ export class Documenter implements vs.Disposable {
     this._services = ts.createLanguageService(this._languageServiceHost, ts.createDocumentRegistry());
   }
 
+  private _emitToDo(sb: SnippetStringBuilder, name: string): void {
+    if (vs.workspace.getConfiguration().get('comment-ts.todoComments', false)) {
+      sb.appendLine('// TODO: comment ' + name);
+    }
+  }
+
 /**
+ * // TODO: comment _emitDescription
  * Emits description
  * @param sb
  * @param node
  * @returns
  */
-private _emitDescription(sb: SnippetStringBuilder, node: ts.Node) {
+  private _emitDescription(sb: SnippetStringBuilder, node: ts.Node) {
     const parseNames = vs.workspace.getConfiguration().get('comment-ts.parseNames', true);
     if (!parseNames) {
       return;
@@ -40,6 +47,7 @@ private _emitDescription(sb: SnippetStringBuilder, node: ts.Node) {
     switch (node.kind) {
       case ts.SyntaxKind.GetAccessor: {
         const splitNameGet = utils.separateCamelcaseString(name);
+        this._emitToDo(sb, name);
         sb.append('Gets ');
         sb.append(splitNameGet);
         sb.appendSnippetTabstop();
@@ -47,6 +55,7 @@ private _emitDescription(sb: SnippetStringBuilder, node: ts.Node) {
       }
       case ts.SyntaxKind.SetAccessor: {
         const splitNameSet = utils.separateCamelcaseString(name);
+        this._emitToDo(sb, name);
         sb.append('Sets ');
         sb.append(splitNameSet);
         sb.appendSnippetTabstop();
@@ -54,6 +63,7 @@ private _emitDescription(sb: SnippetStringBuilder, node: ts.Node) {
       }
       case ts.SyntaxKind.PropertyDeclaration: {
         const splitName = utils.separateCamelcase(name);
+        this._emitToDo(sb, name);
         if (splitName && splitName.length > 1 && determineVerbs.indexOf(splitName[0]) >= 0) {
           sb.append('Determines whether ');
           sb.append(utils.joinFrom(splitName, 1) + ' ');
@@ -74,6 +84,7 @@ private _emitDescription(sb: SnippetStringBuilder, node: ts.Node) {
       case ts.SyntaxKind.ArrowFunction:
       case ts.SyntaxKind.FunctionDeclaration: {
         const splitName = utils.separateCamelcase(name);
+        this._emitToDo(sb, name);
         if (splitName && splitName.length > 1 && determineVerbs.indexOf(splitName[0].toLowerCase()) >= 0) {
           sb.append('Determines whether ');
           sb.append(utils.joinFrom(splitName, 1) + ' ');
@@ -85,18 +96,21 @@ private _emitDescription(sb: SnippetStringBuilder, node: ts.Node) {
               const verb = utils.capitalizeFirstLetter(splitName[0]);
               sb.append(verb + ' ');
             } else if (splitName[0].length <= 2) {
-              // delete prefix like ng
-              splitName.splice(0, 1);
+              // ignore prefix like ng
+              // splitName.splice(0, 1);
             } else if (splitName.length > 0) {
               // verb
               let verb = utils.capitalizeFirstLetter(splitName[0]);
-              if (!this.endsWithOneOf(verb, postfixVerb)) { // check if verb with s
+              sb.append(verb);
+              if (!this.endsWithOneOf(verb, postfixVerb) && !verb.endsWith('s')) {
+                // check if verb with s
                 if (verb.endsWith('y')) {
                   // convert y > ie
                   verb = verb.substr(0, verb.length - 1) + 'ie';
                 }
-                sb.append(verb + 's ');
+                sb.append('s');
               }
+              sb.append(' ');
             }
             if (splitName.length > 1) {
               // more than one word, append rest
@@ -118,6 +132,7 @@ private _emitDescription(sb: SnippetStringBuilder, node: ts.Node) {
       case ts.SyntaxKind.InterfaceDeclaration:
       case ts.SyntaxKind.EnumDeclaration: {
         const splitClassName = utils.separateCamelcaseString(name);
+        this._emitToDo(sb, name);
         sb.append(utils.capitalizeFirstLetter(splitClassName));
         sb.appendSnippetTabstop();
         break;
@@ -147,9 +162,7 @@ private _emitDescription(sb: SnippetStringBuilder, node: ts.Node) {
     const selection = editor.selection;
     const caret = selection.start;
 
-    if (vs.workspace.getConfiguration().get('comment-ts.replaceComments', false)) {
-      this.currentComments = utils.createMap(editor, selection);
-    }
+    this.currentComments = utils.createMap(editor, selection);
 
     const position = ts.getPositionOfLineAndCharacter(sourceFile, caret.line, caret.character);
     const node = utils.findChildForPosition(sourceFile, position);
@@ -170,12 +183,12 @@ private _emitDescription(sb: SnippetStringBuilder, node: ts.Node) {
       this._showFailureMessage(commandName, 'at the current position');
     }
   }
-
-  /**
-   * Traces node
-   * @param editor
-   */
-  traceNode(editor: vs.TextEditor) {
+/**
+ * // TODO: comment traceNode
+ * Traces node
+ * @param editor
+ */
+traceNode(editor: vs.TextEditor) {
     const selection = editor.selection;
     const caret = selection.start;
 
@@ -235,7 +248,7 @@ private _emitDescription(sb: SnippetStringBuilder, node: ts.Node) {
     return sb.toString();
   }
 
-  private _showFailureMessage(commandName: string, condition: string) {
+private _showFailureMessage(commandName: string, condition: string) {
     vs.window.showErrorMessage(`Sorry! '${commandName}' wasn't able to produce documentation ${condition}.`);
   }
 
@@ -248,11 +261,32 @@ private _emitDescription(sb: SnippetStringBuilder, node: ts.Node) {
     const startPosition = new vs.Position(forCompletion ? location.line - 1 : location.line, location.character);
     const endPosition = new vs.Position(location.line, location.character);
 
-    const range = new Range(startPosition, endPosition);
+    // TODO: delete selection
+
+    let range = new Range(startPosition, endPosition);
+
+    if (vs.workspace.getConfiguration().get('comment-ts.replaceComments', true)) {
+      const startpos = editor.selection.start.line;
+      const endpos = editor.selection.end.line;
+
+      const startline = editor.document.lineAt(startpos).text.trim();
+      const endline = editor.document.lineAt(endpos).text.trim();
+
+      if (startline.startsWith('/**') && endline.startsWith('*/')) {
+        range = new Range(editor.selection.start, new vs.Position(editor.selection.end.line + 1, 0));
+        vs.window.showInformationMessage(
+          'Previous comment updated from line ' + editor.selection.start.line + ' to ' + editor.selection.end.line
+        );
+      }
+    }
 
     editor.insertSnippet(sb.toCommentValue(), range);
   }
-
+  /**
+   * Gets source file
+   * @param document
+   * @returns
+   */
   private _getSourceFile(document: vs.TextDocument) {
     const fileText = document.getText();
     const canonicalFileName = utils.getDocumentFileName(document);

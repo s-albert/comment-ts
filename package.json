@@ -1,8 +1,8 @@
 {
   "name": "comment-ts",
   "displayName": "Comments in Typescript",
-  "description": "Automatically generates detailed JSDoc comments in TypeScript files.",
-  "version": "0.3.21",
+  "description": "Generates JSDoc comments in TypeScript files.",
+  "version": "0.5.0",
   "publisher": "salbert",
   "icon": "images/icon.png",
   "scripts": {
@@ -28,7 +28,7 @@
     "commands": [
       {
         "command": "comment-ts.documentThis",
-        "title": "Comment..."
+        "title": "Comment code"
       },
       {
         "command": "comment-ts.traceTypeScriptSyntaxNode",
@@ -55,8 +55,13 @@
       "properties": {
         "comment-ts.replaceComments": {
           "type": "boolean",
+          "default": true,
+          "description": "When enabled, selected JSDoc comments will be updated, else the previous comments will be preserved."
+        },
+        "comment-ts.todoComments": {
+          "type": "boolean",
           "default": false,
-          "description": "When enabled, selected JSDoc comments will be updated (experimental)."
+          "description": "Inserts TODO in created comments."
         },
         "comment-ts.includeDescriptionTag": {
           "type": "boolean",

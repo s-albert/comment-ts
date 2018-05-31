@@ -10,3 +10,9 @@ All notable changes to the "comment-ts" extension will be documented in this fil
 ## [0.2.0] - 2018-05-06
 - more rules to parse names
 
+## [0.4.0] - 2018-05-30
+- selected comments are updated
+
+## [0.5.0] - 2018-05-31
+- optional TODO: lines
+
