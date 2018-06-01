@@ -25,7 +25,27 @@ export function indexOfBlank(s: string, pos = 0): number {
 }
 
 /**
- * Creates map
+ * @description Adds to map
+ * @author S.Albert
+ * @param tag
+ * @param lineText
+ * @param map
+ * @returns true if to map
+ */
+function addToMap(tag: string, lineText: string, map: Map<string, string>): boolean {
+  const index = lineText.indexOf(tag);
+  if (index > 0) {
+    let parse = lineText.substring(index + tag.length);
+    map.set(tag, parse.trim());
+    return true;
+  } else {
+    return false;
+  }
+}
+/**
+ * // TODO: comment createMap
+ * @description Creates map
+ * @author S.Albert
  * @param editor
  * @param selection
  * @returns map
@@ -50,26 +70,25 @@ export function createMap(editor: vs.TextEditor, selection: vs.Selection): Map<s
           map.set(parse.substring(0, blank).trim(), parse.substring(blank).trim());
         }
         continue;
-      }
-      const ret = lineText.indexOf('@returns');
-      if (ret > 0) {
-        let parse = lineText.substring(ret + '@returns'.length);
-        map.set('@returns', parse.trim());
+      } else if (addToMap('@returns', lineText, map)) {
         continue;
-      }
-      const description = lineText.indexOf('@description');
-      if (ret > 0) {
-        let parse = lineText.substring(description + '@description'.length);
-        map.set('@description', parse.trim());
+      } else if (addToMap('@description', lineText, map)) {
         continue;
-      }
-      const parse = lineText.substring(firstChar + 2).trim();
-      if (parse.length > 0) {
-        if (map.has('@description')) {
-          const currentText = map.get('@description');
-          map.set('@description', `${currentText}\n${parse}`);
-        } else {
-          map.set('@description', parse);
+      } else if (addToMap('@author', lineText, map)) {
+        continue;
+      } else if (addToMap('@template', lineText, map)) {
+        continue;
+      } else if (addToMap('// TODO:', lineText, map)) {
+        continue;
+      } else {
+        const parse = lineText.substring(firstChar + 2).trim();
+        if (parse.length > 0) {
+          if (map.has('@description')) {
+            const currentText = map.get('@description');
+            map.set('@description', `${currentText}\n${parse}`);
+          } else {
+            map.set('@description', parse);
+          }
         }
       }
     }

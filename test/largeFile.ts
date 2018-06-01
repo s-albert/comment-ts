@@ -26,6 +26,10 @@ interface SomeInterface {
     someFunction3: (someParam1: Date, someParam2: string, someParam3: boolean) => number;
 }
 
+
+/**
+ * comment SomeClassSome class
+ */
 class SomeClass {
     /**
      * Testing a property.
@@ -46,16 +50,15 @@ class SomeClass {
         return true;
     }
 
-    /**
-     * This is a test of the enableJumpToDescriptionLocation setting set to true.
-     *
-     * @param {string} someParam1
-     * @param {number} someParam2
-     * @returns {boolean}
-     *
-     * @memberOf SomeClass
-     */
-    someFunction2(someParam1: string, someParam2: number): boolean {
+
+/**
+ * This is a test of the enableJumpToDescriptionLocation setting set to true.
+ * @memberOf SomeClass
+ * @param someParam1 test
+ * @param someParam2 test2
+ * @returns something
+ */
+ someFunction2(someParam1: string, someParam2: number): boolean {
         return true;
     }
 

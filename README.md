@@ -26,28 +26,24 @@ Generates comments for whatever the caret is on or inside of.
 The comments will look like:
 ```
   /**
-   * documents this
-   * @param editor
-   * @param commandName
-   * @param forCompletion
-   * @returns
-   */
-
-  /**
-   * Creates an instance of Documenter.
-   */
-
-  /**
-  * Checks spelling
-  * @param str
-  * @returns true if spelling
+  * Creates an instance of documenter.
   */
+  constructor()
 
   /**
-  * Capitalizes first letter
-  * @param str
-  * @returns
+  * // TODO: comment dispose
+  * Disposes documenter
   */
+  dispose() {
+
+  /**
+  * // TODO: comment getScriptVersion
+  * Gets script version
+  * @param fileName
+  * @returns script version
+  */
+  getScriptVersion(fileName: string): string {
+
 ```
 ### To update an existing comment
 If some parameters have changed, you might want to preserve comments of unchanged parameter.

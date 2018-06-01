@@ -24,7 +24,13 @@ export class LanguageServiceHost implements ts.LanguageServiceHost {
     return Object.keys(this._files);
   }
 
-  getScriptVersion(fileName: string) {
+  /**
+   * // TODO: comment getScriptVersion
+   * Gets script version
+   * @param fileName
+   * @returns script version
+   */
+  getScriptVersion(fileName: string): string {
     return this._files[fileName] && this._files[fileName].version.toString();
   }
 

@@ -30,24 +30,23 @@ export class Documenter implements vs.Disposable {
     }
   }
 
-/**
- * // TODO: comment _emitDescription
- * Emits description
- * @param sb
- * @param node
- * @returns
- */
-  private _emitDescription(sb: SnippetStringBuilder, node: ts.Node) {
+  /**
+   * // TODO: comment _emitDescription
+   * @description Emits description
+   * @param sb
+   * @param node
+   * @param name
+   * @returns
+   */
+  private _emitDescription(sb: SnippetStringBuilder, node: ts.Node, name: string) {
     const parseNames = vs.workspace.getConfiguration().get('comment-ts.parseNames', true);
     if (!parseNames) {
       return;
     }
-    const name = utils.findFirstChildOfKindDepthFirst(node, [ts.SyntaxKind.Identifier]).getText();
 
     switch (node.kind) {
       case ts.SyntaxKind.GetAccessor: {
         const splitNameGet = utils.separateCamelcaseString(name);
-        this._emitToDo(sb, name);
         sb.append('Gets ');
         sb.append(splitNameGet);
         sb.appendSnippetTabstop();
@@ -55,7 +54,6 @@ export class Documenter implements vs.Disposable {
       }
       case ts.SyntaxKind.SetAccessor: {
         const splitNameSet = utils.separateCamelcaseString(name);
-        this._emitToDo(sb, name);
         sb.append('Sets ');
         sb.append(splitNameSet);
         sb.appendSnippetTabstop();
@@ -63,7 +61,6 @@ export class Documenter implements vs.Disposable {
       }
       case ts.SyntaxKind.PropertyDeclaration: {
         const splitName = utils.separateCamelcase(name);
-        this._emitToDo(sb, name);
         if (splitName && splitName.length > 1 && determineVerbs.indexOf(splitName[0]) >= 0) {
           sb.append('Determines whether ');
           sb.append(utils.joinFrom(splitName, 1) + ' ');
@@ -84,7 +81,6 @@ export class Documenter implements vs.Disposable {
       case ts.SyntaxKind.ArrowFunction:
       case ts.SyntaxKind.FunctionDeclaration: {
         const splitName = utils.separateCamelcase(name);
-        this._emitToDo(sb, name);
         if (splitName && splitName.length > 1 && determineVerbs.indexOf(splitName[0].toLowerCase()) >= 0) {
           sb.append('Determines whether ');
           sb.append(utils.joinFrom(splitName, 1) + ' ');
@@ -132,7 +128,6 @@ export class Documenter implements vs.Disposable {
       case ts.SyntaxKind.InterfaceDeclaration:
       case ts.SyntaxKind.EnumDeclaration: {
         const splitClassName = utils.separateCamelcaseString(name);
-        this._emitToDo(sb, name);
         sb.append(utils.capitalizeFirstLetter(splitClassName));
         sb.appendSnippetTabstop();
         break;
@@ -140,6 +135,13 @@ export class Documenter implements vs.Disposable {
     }
   }
 
+  /**
+   * // TODO: comment endsWithOneOf
+   * @description Ends with one of
+   * @param verb
+   * @param postfix
+   * @returns true if with one of
+   */
   private endsWithOneOf(verb: string, postfix: string): boolean {
     const postfixes = postfix.split(';');
     return postfixes.findIndex((p, index, arr) => verb.endsWith(p)) >= 0;
@@ -148,9 +150,10 @@ export class Documenter implements vs.Disposable {
   private currentComments = new Map<string, string>();
 
   /**
-   * Documents this function
+   * @description Documents this function
    * more doku
    * and even more 7777
+   * @author S.Albert
    * @param editor hurra 4444
    * @param commandName 111 6666
    * @param forCompletion 222 77777
@@ -183,12 +186,8 @@ export class Documenter implements vs.Disposable {
       this._showFailureMessage(commandName, 'at the current position');
     }
   }
-/**
- * // TODO: comment traceNode
- * Traces node
- * @param editor
- */
-traceNode(editor: vs.TextEditor) {
+
+  traceNode(editor: vs.TextEditor) {
     const selection = editor.selection;
     const caret = selection.start;
 
@@ -248,11 +247,19 @@ traceNode(editor: vs.TextEditor) {
     return sb.toString();
   }
 
-private _showFailureMessage(commandName: string, condition: string) {
+  private _showFailureMessage(commandName: string, condition: string) {
     vs.window.showErrorMessage(`Sorry! '${commandName}' wasn't able to produce documentation ${condition}.`);
   }
 
-  private _insertDocumentation(
+/**
+ * // TODO: comment _insertDocumentation
+ * Inserts documentation
+ * @param sb
+ * @param location
+ * @param editor
+ * @param forCompletion
+ */
+private _insertDocumentation(
     sb: SnippetStringBuilder,
     location: ts.LineAndCharacter,
     editor: vs.TextEditor,
@@ -280,14 +287,24 @@ private _showFailureMessage(commandName: string, condition: string) {
       }
     }
 
-    editor.insertSnippet(sb.toCommentValue(), range);
+    editor.insertSnippet(sb.toCommentValue(this.updateWithCurrentComments()), range);
   }
+
   /**
-   * Gets source file
-   * @param document
-   * @returns
+   * // TODO: comment updateWithCurrentComments
+   * Updates with current comments
+   * @returns true if with current comments
    */
-  private _getSourceFile(document: vs.TextDocument) {
+  private updateWithCurrentComments(): boolean {
+    return this.currentComments.size > 0;
+  }
+
+/**
+ * comment _getSourceFileGets source file
+ * @param document
+ * @returns source file
+ */
+  private _getSourceFile(document: vs.TextDocument): ts.SourceFile {
     const fileText = document.getText();
     const canonicalFileName = utils.getDocumentFileName(document);
     this._languageServiceHost.updateCurrentFile(canonicalFileName, fileText);
@@ -308,6 +325,13 @@ private _showFailureMessage(commandName: string, condition: string) {
     return sourceFile;
   }
 
+/**
+ * // TODO: comment _documentNodeDocuments nodedocumenterdocumenter
+ * @param sb
+ * @param node
+ * @param sourceFile
+ * @returns node
+ */
   private _documentNode(sb: SnippetStringBuilder, node: ts.Node, sourceFile: ts.SourceFile): ts.LineAndCharacter {
     switch (node.kind) {
       case ts.SyntaxKind.ClassDeclaration:
@@ -348,16 +372,41 @@ private _showFailureMessage(commandName: string, condition: string) {
     return ts.getLineAndCharacterOfPosition(sourceFile, node.getStart());
   }
 
+  private _emitMap(sb: SnippetStringBuilder, tag: string, writeTag = false): boolean {
+    if (this.currentComments.has(tag)) {
+      if (writeTag) {
+        sb.append(tag + ' ');
+      }
+      const text = this.currentComments.get(tag);
+      sb.append(text);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * // TODO: comment _emitDescriptionHeader
+   * Emits description header
+   * @param sb
+   * @param node
+   */
   private _emitDescriptionHeader(sb: SnippetStringBuilder, node: ts.Node) {
+    const name = utils.findFirstChildOfKindDepthFirst(node, [ts.SyntaxKind.Identifier]).getText();
+
+    if (this.updateWithCurrentComments()) {
+      this._emitMap(sb, '// TODO:', true);
+      sb.appendLine();
+    } else {
+      // todo only for new comments
+      this._emitToDo(sb, name);
+    }
+
     if (vs.workspace.getConfiguration().get('comment-ts.includeDescriptionTag', false)) {
       sb.append('@description ');
     }
-    if (this.currentComments.has('@description')) {
-      const text = this.currentComments.get('@description');
-      sb.append(text);
-    } else {
-      sb.appendSnippetTabstop();
-      this._emitDescription(sb, node);
+    if (!this._emitMap(sb, '@description')) {
+      this._emitDescription(sb, node, name);
     }
     sb.appendLine();
   }
@@ -366,7 +415,7 @@ private _showFailureMessage(commandName: string, condition: string) {
     if (vs.workspace.getConfiguration().get('comment-ts.includeAuthorTag', false)) {
       let author: string = vs.workspace.getConfiguration().get('comment-ts.authorName', '');
       sb.append('@author ' + author);
-      sb.appendSnippetTabstop();
+      // sb.appendSnippetTabstop();
       sb.appendLine();
     }
   }
@@ -482,10 +531,7 @@ private _showFailureMessage(commandName: string, condition: string) {
     if (utils.findNonVoidReturnInCurrentScope(node) || (node.type && node.type.getText() !== 'void')) {
       sb.append('@returns ');
 
-      if (this.currentComments.has('@returns')) {
-        const text = this.currentComments.get('@returns');
-        sb.append(text);
-      } else {
+      if (!this._emitMap(sb, '@returns')) {
         const parseNames = vs.workspace.getConfiguration().get('comment-ts.parseNames', true);
         if (node.type && parseNames) {
           const methodname = utils.separateCamelcaseNounString(node.name.getText());
@@ -544,17 +590,18 @@ private _showFailureMessage(commandName: string, condition: string) {
 
       sb.append(' ');
 
-      if (this.currentComments.has(name)) {
-        const text = this.currentComments.get(name);
-        sb.append(text);
-      }
+      this._emitMap(sb, name);
 
       sb.appendSnippetTabstop();
 
       sb.appendLine();
     });
   }
-
+  /**
+   * Emits constructor declaration
+   * @param sb
+   * @param node
+   */
   private _emitConstructorDeclaration(sb: SnippetStringBuilder, node: ts.ConstructorDeclaration) {
     const className = (<ts.ClassDeclaration>node.parent).name.getText();
     sb.appendSnippetPlaceholder(`Creates an instance of ${utils.separateCamelcaseString(className)}.`);
@@ -584,7 +631,10 @@ private _showFailureMessage(commandName: string, condition: string) {
       sb.appendLine();
     });
   }
-
+  /**
+   * // TODO: comment dispose
+   * Disposes documenter
+   */
   dispose() {
     if (this._outputChannel) {
       this._outputChannel.dispose();
