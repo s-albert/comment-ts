@@ -2,7 +2,7 @@
   "name": "comment-ts",
   "displayName": "Comments in Typescript",
   "description": "Generates JSDoc comments in TypeScript files.",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "publisher": "salbert",
   "icon": "images/icon.png",
   "scripts": {
@@ -12,7 +12,12 @@
     "publish": "vsce publish",
     "postinstall": "node ./node_modules/vscode/bin/install"
   },
-  "keywords": ["comment", "document", "typescript", "ts"],
+  "keywords": [
+    "comment",
+    "document",
+    "typescript",
+    "ts"
+  ],
   "galleryBanner": {
     "color": "#252627",
     "theme": "dark"
@@ -21,14 +26,24 @@
   "engines": {
     "vscode": "^1.16.0"
   },
-  "categories": ["Other", "Formatters", "Snippets"],
-  "activationEvents": ["*"],
+  "categories": [
+    "Other",
+    "Formatters",
+    "Snippets"
+  ],
+  "activationEvents": [
+    "*"
+  ],
   "main": "./out/src/extension",
   "contributes": {
     "commands": [
       {
         "command": "comment-ts.documentThis",
         "title": "Comment code"
+      },
+      {
+        "command": "comment-ts.constructor",
+        "title": "Generate constructor"
       },
       {
         "command": "comment-ts.traceTypeScriptSyntaxNode",

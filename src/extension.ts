@@ -1,6 +1,7 @@
 import * as vs from 'vscode';
 import { CancellationToken, CompletionItem, CompletionItemKind, Position, Range, TextDocument } from 'vscode';
 import { Documenter } from './documenter';
+import { generateClassesList, EType, generateCode } from './utilities';
 
 const languages = ['typescript', 'tyspescriptreact'];
 
@@ -79,6 +80,13 @@ export function activate(context: vs.ExtensionContext): void {
       '/',
       '*'
     )
+  );
+
+  context.subscriptions.push(
+    vs.commands.registerCommand('comment-ts.constructor', () => {
+      const classesList = generateClassesList(EType.BOTH);
+      generateCode(classesList, EType.CONSTRUCTOR);
+    })
   );
 
   context.subscriptions.push(
