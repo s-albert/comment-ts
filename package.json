@@ -42,6 +42,10 @@
         "title": "Comment code"
       },
       {
+        "command": "comment-ts.constructor",
+        "title": "Generate constructor"
+      },
+      {
         "command": "comment-ts.traceTypeScriptSyntaxNode",
         "title": "Trace TypeScript Syntax Node"
       }
