@@ -30,14 +30,14 @@ export class Documenter implements vs.Disposable {
     }
   }
 
-  /**
-   * // TODO: comment _emitDescription
-   * @description Emits description
-   * @param sb
-   * @param node
-   * @param name
-   * @returns
-   */
+/**
+ * // TODO: comment _emitDescription
+ * Emits description
+ * @param sb 1
+ * @param node 2
+ * @param name 3
+ * @returns 4
+ */
   private _emitDescription(sb: SnippetStringBuilder, node: ts.Node, name: string) {
     const parseNames = vs.workspace.getConfiguration().get('comment-ts.parseNames', true);
     if (!parseNames) {

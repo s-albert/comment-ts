@@ -216,11 +216,13 @@ export function findChildForPosition(node: ts.Node, position: number): ts.Node {
       return;
     }
 
-    if (start <= position && end >= position) {
-      lastMatchingNode = n;
-    }
+    if (n.kind !== ts.SyntaxKind.Decorator) {
+      if (start <= position && end >= position) {
+        lastMatchingNode = n;
+      }
 
-    n.getChildren().forEach(findChildFunc);
+      n.getChildren().forEach(findChildFunc);
+    }
   };
 
   findChildFunc(node);
