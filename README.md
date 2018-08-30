@@ -67,4 +67,7 @@ If some parameters have changed, you might want to preserve comments of unchange
 * [TypeDoc](http://typedoc.org/guides/installation/)
 A documentation generator for TypeScript projects.
 
+## Generate constructor with destructuring params
+Useful refactoring pattern for immutable model classes: A constructor is generated with destructuring params of all readonly fields.
+
 ## The original codebase is from Document This. Thanks to the contributors!

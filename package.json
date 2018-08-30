@@ -2,7 +2,7 @@
   "name": "comment-ts",
   "displayName": "Comments in Typescript",
   "description": "Generates JSDoc comments in TypeScript files.",
-  "version": "0.5.10",
+  "version": "0.6.2",
   "publisher": "salbert",
   "icon": "images/icon.png",
   "scripts": {
@@ -43,7 +43,7 @@
       },
       {
         "command": "comment-ts.constructor",
-        "title": "Generate constructor"
+        "title": "Generate constructor with destructuring params"
       },
       {
         "command": "comment-ts.traceTypeScriptSyntaxNode",

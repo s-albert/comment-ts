@@ -372,6 +372,7 @@ interface IClass {
 
 const matchers = {
   className: /class\s([a-zA-Z]+)/,
+  readonlyDef: /[\s]*readonly[\s]*([a-zA-Z_$][0-9a-zA-Z_$]*)[\s]?\:[\s]?([\.\<\>\{\}\[\]a-zA-Z_$\s<>,]+)[\=|\;]/,
   privateDef: /[\s]*private[\s]*([a-zA-Z_$][0-9a-zA-Z_$]*)[\s]?\:[\s]?([\.\<\>\{\}\[\]a-zA-Z_$\s<>,]+)[\=|\;]/,
   getMethod: /public[\s]get[\s]?([a-zA-Z_$][0-9a-zA-Z_$]*)[\(\)]+/,
   setMethod: /public[\s]set[\s]?([a-zA-Z_$][0-9a-zA-Z_$]*)[\(]+[a-zA-Z_$][0-9a-zA-Z_$]*[\s\:]+/
@@ -416,17 +417,19 @@ export function generateClassesList(type: EType): IClass[] {
     if (brackets.within) {
       let _class = getClass(classes, brackets.name);
       const matches = {
-        privateDef: line.text.match(matchers.privateDef),
+        // privateDef: line.text.match(matchers.privateDef),
+        readonlyDef: line.text.match(matchers.readonlyDef),
         getMethod: line.text.match(matchers.getMethod),
         setMethod: line.text.match(matchers.setMethod)
       };
-      if (_class && (matches.getMethod || matches.privateDef || matches.setMethod)) {
+      if (_class && (matches.getMethod || matches.readonlyDef || matches.setMethod)) {
         // push the found items into the approriate containers
-        if (matches.privateDef) {
+        if (matches.readonlyDef) {
           _class.vars.push({
-            name: matches.privateDef[1],
-            figure: publicName(matches.privateDef[1]),
-            typeName: matches.privateDef[2]
+            name: matches.readonlyDef[1],
+            // figure: publicName(matches.readonlyDef[1]),
+            figure: matches.readonlyDef[1],
+            typeName: matches.readonlyDef[2]
           });
         }
         if (matches.getMethod) {
@@ -495,16 +498,16 @@ function getClass(items: IClass[], name: string): IClass {
 
 // convert the private name to a public name
 // based on the 'classic' setting, see README.md
-function publicName(fname: string) {
-  const classic = vs.workspace.getConfiguration('genGetSet').get('classic');
-  if (classic) {
-    return fname;
-  }
-  if (fname.startsWith('_')) {
-    return fname.substring(1);
-  }
-  return '$' + fname;
-}
+// function publicName(fname: string) {
+//   const classic = vs.workspace.getConfiguration('genGetSet').get('classic');
+//   if (classic) {
+//     return fname;
+//   }
+//   if (fname.startsWith('_')) {
+//     return fname.substring(1);
+//   }
+//   return '$' + fname;
+// }
 
 // generate code lines into the current active window based on EType
 export function generateCode(classes: IClass[], type: EType, pickedItem?: vs.QuickPickItem) {
@@ -531,7 +534,7 @@ export function generateCode(classes: IClass[], type: EType, pickedItem?: vs.Qui
     vs.window.activeTextEditor.edit((builder) => {
       for (let i = 0; i < classes.length; i++) {
         if (currentPos.isAfterOrEqual(classes[i].startPos) || currentPos.isBeforeOrEqual(classes[i].endPos)) {
-          builder.insert(currentPos, createConstructor(classes[i].vars));
+          builder.insert(currentPos, createConstructor(classes[i]));
           return;
         }
       }
@@ -539,19 +542,21 @@ export function generateCode(classes: IClass[], type: EType, pickedItem?: vs.Qui
   }
 }
 
-function createConstructor(items: IVar[]) {
-  let c = '\n\tconstructor(';
+function createConstructor(thisClass: IClass) {
+  let items = thisClass.vars;
+  let c = '\n\tconstructor({ ';
   let b = false;
   for (let i = 0; i < items.length; i++) {
     if (b) {
       c += ', ';
     }
-    c += items[i].figure + ': ' + items[i].typeName;
+    c += items[i].figure;
+    // c += items[i].figure + ': ' + items[i].typeName;
     if (!b) {
       b = true;
     }
   }
-  c += ') {';
+  c += ` }: ${thisClass.name}) {`;
   b = false;
   for (let i = 0; i < items.length; i++) {
     c += '\n\t\tthis.' + items[i].name + ' = ' + items[i].figure + ';';
