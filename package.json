@@ -2,7 +2,7 @@
   "name": "comment-ts",
   "displayName": "Comments in Typescript",
   "description": "Generates JSDoc comments in TypeScript files.",
-  "version": "0.6.2",
+  "version": "0.6.4",
   "publisher": "salbert",
   "icon": "images/icon.png",
   "scripts": {
@@ -43,11 +43,11 @@
       },
       {
         "command": "comment-ts.constructor",
-        "title": "Generate constructor with destructuring params"
+        "title": "comment-ts: Generate constructor of readonly fields"
       },
       {
         "command": "comment-ts.traceTypeScriptSyntaxNode",
-        "title": "Trace TypeScript Syntax Node"
+        "title": "comment-ts: Trace typeScript syntax node"
       }
     ],
     "menus": {

@@ -16,3 +16,6 @@ All notable changes to the "comment-ts" extension will be documented in this fil
 ## [0.5.0] - 2018-05-31
 - optional TODO: lines
 
+## [0.6.0] - 2018-08-30
+- construtor generator for models (including comments)
+

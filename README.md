@@ -68,6 +68,10 @@ If some parameters have changed, you might want to preserve comments of unchange
 A documentation generator for TypeScript projects.
 
 ## Generate constructor with destructuring params
-Useful refactoring pattern for immutable model classes: A constructor is generated with destructuring params of all readonly fields.
+* Useful refactoring pattern for immutable model classes: A constructor is generated of all readonly fields.
+* You may initialize the model with an object or with named params from an e.g. dto using the destructuring pattern.
+```
+const model = new Model( { result: 42, author: 'adams',.... });
+```
 
 ## The original codebase is from Document This. Thanks to the contributors!

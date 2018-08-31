@@ -373,7 +373,7 @@ interface IClass {
 const matchers = {
   className: /class\s([a-zA-Z]+)/,
   readonlyDef: /[\s]*readonly[\s]*([a-zA-Z_$][0-9a-zA-Z_$]*)[\s]?\:[\s]?([\.\<\>\{\}\[\]a-zA-Z_$\s<>,]+)[\=|\;]/,
-  privateDef: /[\s]*private[\s]*([a-zA-Z_$][0-9a-zA-Z_$]*)[\s]?\:[\s]?([\.\<\>\{\}\[\]a-zA-Z_$\s<>,]+)[\=|\;]/,
+  privateDef: /[\s]*private[\s]_*([a-zA-Z_$][0-9a-zA-Z_$]*)[\s]?\:[\s]?([\.\<\>\{\}\[\]a-zA-Z_$\s<>,]+)[\=|\;]/,
   getMethod: /public[\s]get[\s]?([a-zA-Z_$][0-9a-zA-Z_$]*)[\(\)]+/,
   setMethod: /public[\s]set[\s]?([a-zA-Z_$][0-9a-zA-Z_$]*)[\(]+[a-zA-Z_$][0-9a-zA-Z_$]*[\s\:]+/
 };
@@ -544,24 +544,18 @@ export function generateCode(classes: IClass[], type: EType, pickedItem?: vs.Qui
 
 function createConstructor(thisClass: IClass) {
   let items = thisClass.vars;
-  let c = '\n\tconstructor({ ';
-  let b = false;
+  let c = `\n\t/**`;
+  c += `\n\t* Creates an instance of ${thisClass.name}.`;
+  c += `\n\t* @param ${thisClass.name} dto or object with default values to initialize the model`;
+  c += `\n\t* You may use named params like: new ${thisClass.name}( { x: 1, y: 2,... } )`;
+  c += `\n\t*/`;
+  c += `\n\tconstructor( dto: ${thisClass.name}) {`;
+
   for (let i = 0; i < items.length; i++) {
-    if (b) {
-      c += ', ';
-    }
-    c += items[i].figure;
-    // c += items[i].figure + ': ' + items[i].typeName;
-    if (!b) {
-      b = true;
-    }
-  }
-  c += ` }: ${thisClass.name}) {`;
-  b = false;
-  for (let i = 0; i < items.length; i++) {
-    c += '\n\t\tthis.' + items[i].name + ' = ' + items[i].figure + ';';
+    c += `\n\t\tthis.${items[i].name} = dto.${items[i].figure};`;
   }
   c += '\n\t}\n';
+
   return c;
 }
 
