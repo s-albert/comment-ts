@@ -19,3 +19,6 @@ All notable changes to the "comment-ts" extension will be documented in this fil
 ## [0.6.0] - 2018-08-30
 - construtor generator for models (including comments)
 
+## [0.7.0] - 2018-09-01
+- generation of getter and setter (including comments)
+

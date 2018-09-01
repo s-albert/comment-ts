@@ -1,7 +1,13 @@
 import * as vs from 'vscode';
 import { CancellationToken, CompletionItem, CompletionItemKind, Position, Range, TextDocument } from 'vscode';
 import { Documenter } from './documenter';
-import { generateClassesList, EType, generateCode } from './utilities';
+import {
+  generateClassesList,
+  EType,
+  generateCode,
+  quickPickItemListFrom,
+  generateAllGetterAndSetter
+} from './codegen';
 
 const languages = ['typescript', 'tyspescriptreact'];
 
@@ -95,6 +101,39 @@ export function activate(context: vs.ExtensionContext): void {
 
       runCommand(commandName, vs.window.activeTextEditor.document, () => {
         documenter.documentThis(vs.window.activeTextEditor, commandName, forCompletion);
+      });
+    })
+  );
+
+  context.subscriptions.push(
+    vs.commands.registerCommand('comment-ts.getter', function() {
+      const classesList = generateClassesList(EType.GETTER);
+      vs.window.showQuickPick(quickPickItemListFrom(classesList, EType.GETTER)).then((pickedItem) => {
+        generateCode(classesList, EType.GETTER, pickedItem);
+      });
+    })
+  );
+  context.subscriptions.push(
+    vs.commands.registerCommand('comment-ts.setter', function() {
+      const classesList = generateClassesList(EType.SETTER);
+      vs.window.showQuickPick(quickPickItemListFrom(classesList, EType.SETTER)).then((pickedItem) => {
+        generateCode(classesList, EType.SETTER, pickedItem);
+      });
+    })
+  );
+  context.subscriptions.push(
+    vs.commands.registerCommand('comment-ts.allGetterAndSetter', function() {
+      const classesListGetter = generateClassesList(EType.GETTER);
+      const classesListSetter = generateClassesList(EType.SETTER);
+
+      generateAllGetterAndSetter(classesListGetter, classesListSetter);
+    })
+  );
+  context.subscriptions.push(
+    vs.commands.registerCommand('comment-ts.getterAndSetter', function() {
+      const classesList = generateClassesList(EType.BOTH);
+      vs.window.showQuickPick(quickPickItemListFrom(classesList, EType.BOTH)).then((pickedItem) => {
+        generateCode(classesList, EType.BOTH, pickedItem);
       });
     })
   );

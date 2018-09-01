@@ -2,7 +2,7 @@
   "name": "comment-ts",
   "displayName": "Comments in Typescript",
   "description": "Generates JSDoc comments in TypeScript files.",
-  "version": "0.6.4",
+  "version": "0.7.2",
   "publisher": "salbert",
   "icon": "images/icon.png",
   "scripts": {
@@ -39,11 +39,27 @@
     "commands": [
       {
         "command": "comment-ts.documentThis",
-        "title": "Comment code"
+        "title": "comment-ts: Comment code"
+      },
+      {
+        "command": "comment-ts.getter",
+        "title": "comment-ts: Generate getter of private _"
+      },
+      {
+        "command": "comment-ts.setter",
+        "title": "comment-ts: Generate setter of private _"
+      },
+      {
+        "command": "comment-ts.getterAndSetter",
+        "title": "comment-ts: Generate getter and setter of private _"
+      },
+      {
+        "command": "comment-ts.allGetterAndSetter",
+        "title": "comment-ts: Generate ALL getter and setter of private _"
       },
       {
         "command": "comment-ts.constructor",
-        "title": "comment-ts: Generate constructor of readonly fields"
+        "title": "comment-ts: Generate constructor with initialization of readonly fields"
       },
       {
         "command": "comment-ts.traceTypeScriptSyntaxNode",
@@ -62,6 +78,11 @@
       {
         "command": "comment-ts.documentThis",
         "key": "ctrl+alt+c ctrl+alt+c"
+      },
+      {
+        "command": "genGetSet.popup",
+        "key": "alt+shift+g alt+shift+g",
+        "when": "editorTextFocus"
       }
     ],
     "configuration": {
@@ -97,6 +118,11 @@
           "type": "boolean",
           "default": true,
           "description": "When comment-ts.parseNames is enabled, comments are generated from the name semantics."
+        },
+        "comment-ts.scoped": {
+          "type": "boolean",
+          "default": true,
+          "description": "Only show private variables from current class based on cursor position."
         }
       }
     }

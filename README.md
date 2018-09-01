@@ -74,4 +74,7 @@ A documentation generator for TypeScript projects.
 const model = new Model( { result: 42, author: 'adams',.... });
 ```
 
-## The original codebase is from Document This. Thanks to the contributors!
+## Generate getter and setter of private
+* Generates getter and setter properties of private fields starting with underscore.
+
+## Some source code is copied and adapted from Document This and Typescript Toolbox. Thanks to the contributors!
