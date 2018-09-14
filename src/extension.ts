@@ -9,7 +9,7 @@ import {
   generateAllGetterAndSetter
 } from './codegen';
 
-const languages = ['typescript', 'tyspescriptreact'];
+const languages = ['typescript', 'typescriptreact'];
 
 let documenter: Documenter;
 
