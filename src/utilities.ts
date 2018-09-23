@@ -260,6 +260,12 @@ export function findChildrenOfKind(node: ts.Node, kinds = supportedNodeKinds) {
   return children;
 }
 
+/**
+ * // TODO: comment findNonVoidReturnInCurrentScope
+ * Finds non void return in current scope
+ * @param node
+ * @returns
+ */
 export function findNonVoidReturnInCurrentScope(node: ts.Node) {
   let returnNode: ts.ReturnStatement;
 
@@ -291,6 +297,13 @@ export function findNonVoidReturnInCurrentScope(node: ts.Node) {
   return returnNode;
 }
 
+/**
+ * // TODO: comment findVisibleChildrenOfKind
+ * Finds visible children of kind
+ * @param node
+ * @param [kinds]
+ * @returns
+ */
 export function findVisibleChildrenOfKind(node: ts.Node, kinds = supportedNodeKinds) {
   let children = findChildrenOfKind(node, kinds);
 
