@@ -30,14 +30,14 @@ export class Documenter implements vs.Disposable {
     }
   }
 
-/**
- * // TODO: comment _emitDescription
- * Emits description
- * @param sb 1
- * @param node 2
- * @param name 3
- * @returns 4
- */
+  /**
+   * // TODO: comment _emitDescription
+   * Emits description
+   * @param sb 1
+   * @param node 2
+   * @param name 3
+   * @returns 4
+   */
   private _emitDescription(sb: SnippetStringBuilder, node: ts.Node, name: string) {
     const parseNames = vs.workspace.getConfiguration().get('comment-ts.parseNames', true);
     if (!parseNames) {
@@ -46,22 +46,30 @@ export class Documenter implements vs.Disposable {
 
     switch (node.kind) {
       case ts.SyntaxKind.GetAccessor: {
+        const splitName = utils.separateCamelcase(name);
         const splitNameGet = utils.separateCamelcaseString(name);
         sb.append('Gets ');
+        if (splitName && splitName.length > 1 && determineVerbs.indexOf(splitName[0].toLowerCase()) >= 0) {
+          sb.append('whether ');
+        }
         sb.append(splitNameGet);
         sb.appendSnippetTabstop();
         break;
       }
       case ts.SyntaxKind.SetAccessor: {
+        const splitName = utils.separateCamelcase(name);
         const splitNameSet = utils.separateCamelcaseString(name);
         sb.append('Sets ');
+        if (splitName && splitName.length > 1 && determineVerbs.indexOf(splitName[0].toLowerCase()) >= 0) {
+          sb.append('whether ');
+        }
         sb.append(splitNameSet);
         sb.appendSnippetTabstop();
         break;
       }
       case ts.SyntaxKind.PropertyDeclaration: {
         const splitName = utils.separateCamelcase(name);
-        if (splitName && splitName.length > 1 && determineVerbs.indexOf(splitName[0]) >= 0) {
+        if (splitName && splitName.length > 1 && determineVerbs.indexOf(splitName[0].toLowerCase()) >= 0) {
           sb.append('Determines whether ');
           sb.append(utils.joinFrom(splitName, 1) + ' ');
           sb.append(splitName[0]);
@@ -187,6 +195,11 @@ export class Documenter implements vs.Disposable {
     }
   }
 
+  /**
+   * // TODO: comment traceNode
+   * Traces node
+   * @param editor
+   */
   traceNode(editor: vs.TextEditor) {
     const selection = editor.selection;
     const caret = selection.start;
@@ -251,15 +264,15 @@ export class Documenter implements vs.Disposable {
     vs.window.showErrorMessage(`Sorry! '${commandName}' wasn't able to produce documentation ${condition}.`);
   }
 
-/**
- * // TODO: comment _insertDocumentation
- * Inserts documentation
- * @param sb
- * @param location
- * @param editor
- * @param forCompletion
- */
-private _insertDocumentation(
+  /**
+   * // TODO: comment _insertDocumentation
+   * Inserts documentation
+   * @param sb
+   * @param location
+   * @param editor
+   * @param forCompletion
+   */
+  private _insertDocumentation(
     sb: SnippetStringBuilder,
     location: ts.LineAndCharacter,
     editor: vs.TextEditor,
@@ -282,7 +295,7 @@ private _insertDocumentation(
       if (startline.startsWith('/**') && endline.startsWith('*/')) {
         range = new Range(editor.selection.start, new vs.Position(editor.selection.end.line + 1, 0));
         vs.window.showInformationMessage(
-          'Previous comment updated from line ' + editor.selection.start.line + ' to ' + editor.selection.end.line
+          'Comment updated from line ' + editor.selection.start.line + ' to ' + editor.selection.end.line
         );
       }
     }
@@ -299,11 +312,11 @@ private _insertDocumentation(
     return this.currentComments.size > 0;
   }
 
-/**
- * comment _getSourceFileGets source file
- * @param document
- * @returns source file
- */
+  /**
+   * comment _getSourceFileGets source file
+   * @param document
+   * @returns source file
+   */
   private _getSourceFile(document: vs.TextDocument): ts.SourceFile {
     const fileText = document.getText();
     const canonicalFileName = utils.getDocumentFileName(document);
@@ -325,13 +338,13 @@ private _insertDocumentation(
     return sourceFile;
   }
 
-/**
- * // TODO: comment _documentNodeDocuments nodedocumenterdocumenter
- * @param sb
- * @param node
- * @param sourceFile
- * @returns node
- */
+  /**
+   * // TODO: comment _documentNodeDocuments nodedocumenterdocumenter
+   * @param sb
+   * @param node
+   * @param sourceFile
+   * @returns node
+   */
   private _documentNode(sb: SnippetStringBuilder, node: ts.Node, sourceFile: ts.SourceFile): ts.LineAndCharacter {
     switch (node.kind) {
       case ts.SyntaxKind.ClassDeclaration:

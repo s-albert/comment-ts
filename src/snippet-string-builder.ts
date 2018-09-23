@@ -36,9 +36,9 @@ export class SnippetStringBuilder {
   toCommentValue(updateWithMap = false) {
     let sb = new StringBuilder();
 
-    if (!updateWithMap) {
-      sb.appendLine();
-    }
+    // if (!updateWithMap) {
+    //   sb.appendLine();
+    // }
     sb.appendLine('/**');
 
     const lines = this._snippet.value.split('\n');

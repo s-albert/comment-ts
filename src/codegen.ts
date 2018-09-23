@@ -234,8 +234,14 @@ function createConstructor(thisClass: IClass) {
   let items = thisClass.vars;
   let c = `\n\t/**`;
   c += `\n\t* Creates an instance of ${thisClass.name}.`;
-  c += `\n\t* @param ${thisClass.name} dto or object with default values to initialize the model`;
-  c += `\n\t* You may use named params like: new ${thisClass.name}( { x: 1, y: 2,... } )`;
+  c += `\n\t* @param ${thisClass.name} object (e.g. dto) to initialize the model, including:`;
+  for (let i = 0; i < items.length; i++) {
+    c += `\n\t*\t\t${items[i].name}:\t${items[i].typeName},`;
+  }
+  if (items.length >= 2) {
+  c += `\n\t* You may use named params like: new ${thisClass.name}( { ${items[0].name}: <value>, ${items[2].name}: <value>,... } )`;
+  }
+
   c += `\n\t*/`;
   c += `\n\tconstructor( dto: ${thisClass.name}) {`;
 
