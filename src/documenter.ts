@@ -26,18 +26,18 @@ export class Documenter implements vs.Disposable {
 
   private _emitToDo(sb: SnippetStringBuilder, name: string): void {
     if (vs.workspace.getConfiguration().get('comment-ts.todoComments', false)) {
-      sb.appendLine('// TODO: comment ' + name);
+      sb.appendLine('TODO: comment ' + name);
     }
   }
 
-  /**
-   * // TODO: comment _emitDescription
-   * Emits description
-   * @param sb 1
-   * @param node 2
-   * @param name 3
-   * @returns 4
-   */
+/**
+ * TODO: comment _emitDescription
+ * Emits description
+ * @param sb
+ * @param node
+ * @param name
+ * @returns
+ */
   private _emitDescription(sb: SnippetStringBuilder, node: ts.Node, name: string) {
     const parseNames = vs.workspace.getConfiguration().get('comment-ts.parseNames', true);
     if (!parseNames) {
@@ -143,13 +143,12 @@ export class Documenter implements vs.Disposable {
     }
   }
 
-  /**
-   * // TODO: comment endsWithOneOf
-   * @description Ends with one of
-   * @param verb
-   * @param postfix
-   * @returns true if with one of
-   */
+/**
+ * Ends with one of
+ * @param verb
+ * @param postfix
+ * @returns true if with one of
+ */
   private endsWithOneOf(verb: string, postfix: string): boolean {
     const postfixes = postfix.split(';');
     return postfixes.findIndex((p, index, arr) => verb.endsWith(p)) >= 0;
@@ -157,16 +156,15 @@ export class Documenter implements vs.Disposable {
 
   private currentComments = new Map<string, string>();
 
-  /**
-   * @description Documents this function
-   * more doku
-   * and even more 7777
-   * @author S.Albert
-   * @param editor hurra 4444
-   * @param commandName 111 6666
-   * @param forCompletion 222 77777
-   * @returns ret this 55555 uuuu
-   */
+/**
+ * Documents this function
+ * more doku
+ * and even more 7777
+ * @param editor hurra 4444
+ * @param commandName 111 6666
+ * @param forCompletion 222 77777
+ * @returns ret this 55555 uuuu
+ */
   documentThis(editor: vs.TextEditor, commandName: string, forCompletion: boolean): void {
     const sourceFile = this._getSourceFile(editor.document);
 
@@ -195,11 +193,11 @@ export class Documenter implements vs.Disposable {
     }
   }
 
-  /**
-   * // TODO: comment traceNode
-   * Traces node
-   * @param editor
-   */
+/**
+ *
+ * Traces node
+ * @param editor
+ */
   traceNode(editor: vs.TextEditor) {
     const selection = editor.selection;
     const caret = selection.start;
@@ -408,7 +406,7 @@ export class Documenter implements vs.Disposable {
     const name = utils.findFirstChildOfKindDepthFirst(node, [ts.SyntaxKind.Identifier]).getText();
 
     if (this.updateWithCurrentComments()) {
-      this._emitMap(sb, '// TODO:', true);
+      this._emitMap(sb, 'TODO:', true);
       sb.appendLine();
     } else {
       // todo only for new comments

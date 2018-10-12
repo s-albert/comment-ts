@@ -18,14 +18,15 @@ interface IClass {
   startPos: vs.Position;
   endPos?: vs.Position;
   vars: IVar[];
+  reads: IVar[];
   getters: string[];
   setters: string[];
 }
 
 const matchers = {
   className: /class\s([a-zA-Z]+)/,
-  readonlyDef: /[\s]*readonly[\s]*([a-zA-Z_$][0-9a-zA-Z_$]*)[\s]?\:[\s]?([\.\<\>\{\}\[\]a-zA-Z_$\s<>,]+)[\=|\;]/,
-  privateDef: /[\s]*private[\s]*_([a-zA-Z_$][0-9a-zA-Z_$]*)[\s]?\:[\s]?([\.\<\>\{\}\[\]a-zA-Z_$\s<>,]+)[\=|\;]/,
+  readonlyDef: /readonly[\s]([a-zA-Z_$][0-9a-zA-Z_$]*)[\s]?\:[\s]?([\.\<\>\{\}\[\]a-zA-Z_$\s<>,]+)[\=|\;]/,
+  privateDef: /private[\s]_([a-zA-Z_$][0-9a-zA-Z_$]*)[\s]?\:[\s]?([\.\<\>\{\}\[\]a-zA-Z_$\s<>,]+)[\=|\;]/,
   getMethod: /public[\s]get[\s]?([a-zA-Z_$][0-9a-zA-Z_$]*)[\(\)]+/,
   setMethod: /public[\s]set[\s]?([a-zA-Z_$][0-9a-zA-Z_$]*)[\(]+[a-zA-Z_$][0-9a-zA-Z_$]*[\s\:]+/
 };
@@ -94,6 +95,7 @@ export function generateClassesList(type: EType): IClass[] {
         name: brackets.name,
         startPos: new vs.Position(i, 0),
         vars: [],
+        reads: [],
         getters: [],
         setters: []
       });
@@ -111,7 +113,7 @@ export function generateClassesList(type: EType): IClass[] {
       if (_class && (matches.getMethod || matches.readonlyDef || matches.privateDef || matches.setMethod)) {
         // push the found items into the approriate containers
         if (matches.readonlyDef) {
-          _class.vars.push({
+          _class.reads.push({
             name: matches.readonlyDef[1],
             figure: matches.readonlyDef[1],
             typeName: matches.readonlyDef[2]
@@ -231,12 +233,12 @@ export function generateCode(classes: IClass[], type: EType, pickedItem?: vs.Qui
 }
 
 function createConstructor(thisClass: IClass) {
-  let items = thisClass.vars;
+  let items = thisClass.reads;
   let c = `\n\t/**`;
   c += `\n\t* Creates an instance of ${thisClass.name}.`;
   c += `\n\t* @param ${thisClass.name} object (e.g. dto) to initialize the model, including:`;
   for (let i = 0; i < items.length; i++) {
-    c += `\n\t*\t\t${items[i].name}:\t${items[i].typeName},`;
+    c += `\n\t*   ${items[i].name}:\t${items[i].typeName},`;
   }
   if (items.length >= 2) {
   c += `\n\t* You may use named params like: new ${thisClass.name}( { ${items[0].name}: <value>, ${items[2].name}: <value>,... } )`;
