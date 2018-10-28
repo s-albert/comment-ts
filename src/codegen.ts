@@ -4,7 +4,8 @@ export enum EType {
   GETTER,
   SETTER,
   BOTH,
-  CONSTRUCTOR
+  CONSTRUCTOR,
+  INTERFACE
 }
 
 interface IVar {
@@ -202,7 +203,7 @@ function publicName(fname: string) {
 // generate code lines into the current active window based on EType
 export function generateCode(classes: IClass[], type: EType, pickedItem?: vs.QuickPickItem) {
   const currentPos = new vs.Position(vs.window.activeTextEditor.selection.active.line, 0);
-  if (type !== EType.CONSTRUCTOR && pickedItem) {
+  if ((type !== EType.CONSTRUCTOR && type !== EType.INTERFACE) && pickedItem) {
     const _class = getClass(classes, pickedItem.description);
     if (_class) {
       for (let i = 0; i < _class.vars.length; i++) {
@@ -225,6 +226,15 @@ export function generateCode(classes: IClass[], type: EType, pickedItem?: vs.Qui
       for (let i = 0; i < classes.length; i++) {
         if (currentPos.isAfterOrEqual(classes[i].startPos) || currentPos.isBeforeOrEqual(classes[i].endPos)) {
           builder.insert(currentPos, createConstructor(classes[i]));
+          return;
+        }
+      }
+    });
+  } else if (type === EType.INTERFACE) {
+    vs.window.activeTextEditor.edit((builder) => {
+      for (let i = 0; i < classes.length; i++) {
+        if (currentPos.isBefore(classes[i].startPos) || currentPos.isAfter(classes[i].endPos)) {
+          builder.insert(currentPos, createInterface(classes[i]));
           return;
         }
       }
@@ -255,12 +265,27 @@ function createConstructor(thisClass: IClass) {
   return c;
 }
 
+function createInterface(thisClass: IClass) {
+  let items = thisClass.reads;
+  let c = `\n\t/**`;
+  c += `\n\t* Interface with readonly fields of ${thisClass.name}.`;
+  c += `\n\t*/`;
+  c += `\n\tinterface I${thisClass.name} {`;
+
+  for (let i = 0; i < items.length; i++) {
+    c += `\n\t\t${items[i].name}: ${items[i].typeName};`;
+  }
+  c += '\n\t}\n';
+
+  return c;
+}
+
 function createGetter(item: IVar) {
   return (
     '\n    /**\n     * Getter ' +
     item.figure +
     '\n     * @return ' +
-    '\n     */\n\tpublic get ' +
+    '\n     */\n\tget ' +
     item.figure +
     '(): ' +
     item.typeName +
@@ -277,7 +302,7 @@ function createSetter(item: IVar) {
     '\n    /**\n     * Setter ' +
     item.figure +
     '\n     * @param ' +
-    'value\n     */\n\tpublic set ' +
+    'value\n     */\n\tset ' +
     item.figure +
     '(value: ' +
     item.typeName +

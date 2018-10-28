@@ -96,6 +96,13 @@ export function activate(context: vs.ExtensionContext): void {
   );
 
   context.subscriptions.push(
+    vs.commands.registerCommand('comment-ts.interface', () => {
+      const classesList = generateClassesList(EType.BOTH);
+      generateCode(classesList, EType.INTERFACE);
+    })
+  );
+
+  context.subscriptions.push(
     vs.commands.registerCommand('comment-ts.documentThis', (forCompletion: boolean) => {
       const commandName = 'Comment...';
 

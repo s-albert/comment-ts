@@ -71,7 +71,14 @@ A documentation generator for TypeScript projects.
 * Useful refactoring pattern for immutable model classes: A constructor is generated of all readonly fields.
 * You may initialize the model with an object or with named params from an e.g. dto using the destructuring pattern.
 ```
-const model = new Model( { result: 42, author: 'adams',.... });
+const model = new Model( { result: 42, author: 'adams',.... } );
+```
+
+## Generate interface
+* An interface is generated of all readonly fields.
+* You may use this interface in the constructor of the class to exclude properties that shall not be initialized.
+```
+constructor X( dto: IX );
 ```
 
 ## Generate getter and setter of private
