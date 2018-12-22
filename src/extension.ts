@@ -1,13 +1,7 @@
 import * as vs from 'vscode';
 import { CancellationToken, CompletionItem, CompletionItemKind, Position, Range, TextDocument } from 'vscode';
 import { Documenter } from './documenter';
-import {
-  generateClassesList,
-  EType,
-  generateCode,
-  quickPickItemListFrom,
-  generateAllGetterAndSetter
-} from './codegen';
+import { generateClassesList, EType, generateCode, quickPickItemListFrom, generateAllGetterAndSetter } from './codegen';
 
 const languages = ['typescript', 'typescriptreact'];
 
@@ -88,17 +82,19 @@ export function activate(context: vs.ExtensionContext): void {
     )
   );
 
+  const classesListBoth = generateClassesList(EType.BOTH);
+  const classesListGetter = generateClassesList(EType.GETTER);
+  const classesListSetter = generateClassesList(EType.SETTER);
+
   context.subscriptions.push(
     vs.commands.registerCommand('comment-ts.constructor', () => {
-      const classesList = generateClassesList(EType.BOTH);
-      generateCode(classesList, EType.CONSTRUCTOR);
+      generateCode(classesListBoth, EType.CONSTRUCTOR);
     })
   );
 
   context.subscriptions.push(
     vs.commands.registerCommand('comment-ts.interface', () => {
-      const classesList = generateClassesList(EType.BOTH);
-      generateCode(classesList, EType.INTERFACE);
+      generateCode(classesListBoth, EType.INTERFACE);
     })
   );
 
@@ -114,33 +110,27 @@ export function activate(context: vs.ExtensionContext): void {
 
   context.subscriptions.push(
     vs.commands.registerCommand('comment-ts.getter', function() {
-      const classesList = generateClassesList(EType.GETTER);
-      vs.window.showQuickPick(quickPickItemListFrom(classesList, EType.GETTER)).then((pickedItem) => {
-        generateCode(classesList, EType.GETTER, pickedItem);
+      vs.window.showQuickPick(quickPickItemListFrom(classesListGetter, EType.GETTER)).then((pickedItem) => {
+        generateCode(classesListGetter, EType.GETTER, pickedItem);
       });
     })
   );
   context.subscriptions.push(
     vs.commands.registerCommand('comment-ts.setter', function() {
-      const classesList = generateClassesList(EType.SETTER);
-      vs.window.showQuickPick(quickPickItemListFrom(classesList, EType.SETTER)).then((pickedItem) => {
-        generateCode(classesList, EType.SETTER, pickedItem);
+      vs.window.showQuickPick(quickPickItemListFrom(classesListSetter, EType.SETTER)).then((pickedItem) => {
+        generateCode(classesListSetter, EType.SETTER, pickedItem);
       });
     })
   );
   context.subscriptions.push(
     vs.commands.registerCommand('comment-ts.allGetterAndSetter', function() {
-      const classesListGetter = generateClassesList(EType.GETTER);
-      const classesListSetter = generateClassesList(EType.SETTER);
-
       generateAllGetterAndSetter(classesListGetter, classesListSetter);
     })
   );
   context.subscriptions.push(
     vs.commands.registerCommand('comment-ts.getterAndSetter', function() {
-      const classesList = generateClassesList(EType.BOTH);
-      vs.window.showQuickPick(quickPickItemListFrom(classesList, EType.BOTH)).then((pickedItem) => {
-        generateCode(classesList, EType.BOTH, pickedItem);
+      vs.window.showQuickPick(quickPickItemListFrom(classesListBoth, EType.BOTH)).then((pickedItem) => {
+        generateCode(classesListBoth, EType.BOTH, pickedItem);
       });
     })
   );
