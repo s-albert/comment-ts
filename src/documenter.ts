@@ -1,6 +1,5 @@
 import * as ts from 'typescript';
 import * as vs from 'vscode';
-import { Range } from 'vscode';
 import { LanguageServiceHost } from './languageServiceHost';
 import * as utils from './utilities';
 import { SnippetStringBuilder } from './snippet-string-builder';
@@ -30,14 +29,14 @@ export class Documenter implements vs.Disposable {
     }
   }
 
-/**
- * TODO: comment _emitDescription
- * Emits description
- * @param sb
- * @param node
- * @param name
- * @returns
- */
+  /**
+   * TODO: comment _emitDescription
+   * Emits description
+   * @param sb
+   * @param node
+   * @param name
+   * @returns
+   */
   private _emitDescription(sb: SnippetStringBuilder, node: ts.Node, name: string) {
     const parseNames = vs.workspace.getConfiguration().get('comment-ts.parseNames', true);
     if (!parseNames) {
@@ -143,12 +142,12 @@ export class Documenter implements vs.Disposable {
     }
   }
 
-/**
- * Ends with one of
- * @param verb
- * @param postfix
- * @returns true if with one of
- */
+  /**
+   * Ends with one of
+   * @param verb
+   * @param postfix
+   * @returns true if with one of
+   */
   private endsWithOneOf(verb: string, postfix: string): boolean {
     const postfixes = postfix.split(';');
     return postfixes.findIndex((p, index, arr) => verb.endsWith(p)) >= 0;
@@ -156,16 +155,16 @@ export class Documenter implements vs.Disposable {
 
   private currentComments = new Map<string, string>();
 
-/**
- * Documents this function
- * more doku
- * and even more 7777
- * @param editor hurra 4444
- * @param commandName 111 6666
- * @param forCompletion 222 77777
- * @returns ret this 55555 uuuu
- */
-  documentThis(editor: vs.TextEditor, commandName: string, forCompletion: boolean): void {
+  /**
+   * Documents this function
+   * more doku
+   * and even more 7777
+   * @param editor hurra 4444
+   * @param commandName 111 6666
+   * @param forCompletion 222 77777
+   * @returns ret this 55555 uuuu
+   */
+  commentThis(editor: vs.TextEditor, commandName: string, forCompletion: boolean): void {
     const sourceFile = this._getSourceFile(editor.document);
 
     const selection = editor.selection;
@@ -193,11 +192,11 @@ export class Documenter implements vs.Disposable {
     }
   }
 
-/**
- *
- * Traces node
- * @param editor
- */
+  /**
+   * TODO: comment param
+   * Params documenter
+   * @param editor
+   */
   traceNode(editor: vs.TextEditor) {
     const selection = editor.selection;
     const caret = selection.start;
@@ -281,7 +280,7 @@ export class Documenter implements vs.Disposable {
 
     // TODO: delete selection
 
-    let range = new Range(startPosition, endPosition);
+    let range = new vs.Range(startPosition, endPosition);
 
     if (vs.workspace.getConfiguration().get('comment-ts.replaceComments', true)) {
       const startpos = editor.selection.start.line;
@@ -291,7 +290,7 @@ export class Documenter implements vs.Disposable {
       const endline = editor.document.lineAt(endpos).text.trim();
 
       if (startline.startsWith('/**') && endline.startsWith('*/')) {
-        range = new Range(editor.selection.start, new vs.Position(editor.selection.end.line + 1, 0));
+        range = new vs.Range(editor.selection.start, new vs.Position(editor.selection.end.line + 1, 0));
         vs.window.showInformationMessage(
           'Comment updated from line ' + editor.selection.start.line + ' to ' + editor.selection.end.line
         );
@@ -302,7 +301,6 @@ export class Documenter implements vs.Disposable {
   }
 
   /**
-   * // TODO: comment updateWithCurrentComments
    * Updates with current comments
    * @returns true if with current comments
    */
@@ -337,7 +335,8 @@ export class Documenter implements vs.Disposable {
   }
 
   /**
-   * // TODO: comment _documentNodeDocuments nodedocumenterdocumenter
+   * TODO: comment _documentNode
+   * Documents node
    * @param sb
    * @param node
    * @param sourceFile
@@ -383,6 +382,14 @@ export class Documenter implements vs.Disposable {
     return ts.getLineAndCharacterOfPosition(sourceFile, node.getStart());
   }
 
+  /**
+   * TODO: comment _emitMap
+   * Emits map
+   * @param sb
+   * @param tag
+   * @param [writeTag]
+   * @returns true if map
+   */
   private _emitMap(sb: SnippetStringBuilder, tag: string, writeTag = false): boolean {
     if (this.currentComments.has(tag)) {
       if (writeTag) {

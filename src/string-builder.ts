@@ -6,9 +6,9 @@ export class StringBuilder {
   }
 
   /**
-   * // TODO: comment appendLine
+   * TODO: comment appendLine
    * Appends line
-   * @param [text] test x
+   * @param [text]
    */
   appendLine(text = '') {
     this._text += text.toString() + '\n';
