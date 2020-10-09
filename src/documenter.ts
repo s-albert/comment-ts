@@ -150,7 +150,7 @@ export class Documenter implements vs.Disposable {
    */
   private endsWithOneOf(verb: string, postfix: string): boolean {
     const postfixes = postfix.split(';');
-    return postfixes.findIndex((p, index, arr) => verb.endsWith(p)) >= 0;
+    return postfixes.findIndex((p) => verb.endsWith(p)) >= 0;
   }
 
   private currentComments = new Map<string, string>();
@@ -197,7 +197,7 @@ export class Documenter implements vs.Disposable {
    * Params documenter
    * @param editor
    */
-  traceNode(editor: vs.TextEditor) {
+  traceNode(editor: vs.TextEditor): void {
     const selection = editor.selection;
     const caret = selection.start;
 
@@ -215,7 +215,7 @@ export class Documenter implements vs.Disposable {
     }
 
     const sb = new StringBuilder();
-    nodes.reverse().forEach((n, i) => {
+    nodes.reverse().forEach((n) => {
       sb.appendLine(n);
     });
 
@@ -233,9 +233,9 @@ export class Documenter implements vs.Disposable {
    * @param sourceFile
    * @returns
    */
-  private _printNodeInfo(node: ts.Node, sourceFile: ts.SourceFile) {
+  private _printNodeInfo(node: ts.Node, sourceFile: ts.SourceFile): string {
     const sb = new StringBuilder();
-    sb.append(`${node.getStart()} to ${node.getEnd()} --- (${node.kind}) ${(<any>ts).SyntaxKind[node.kind]}`);
+    sb.append(`${node.getStart()} to ${node.getEnd()} --- (${node.kind}) ${ts.SyntaxKind[node.kind]}`);
 
     if (node.parent) {
       const nodeIndex = node.parent.getChildren().indexOf(node);
@@ -297,7 +297,7 @@ export class Documenter implements vs.Disposable {
       }
     }
 
-    editor.insertSnippet(sb.toCommentValue(this.updateWithCurrentComments()), range);
+    editor.insertSnippet(sb.toCommentValue(), range);
   }
 
   /**
@@ -431,7 +431,7 @@ export class Documenter implements vs.Disposable {
 
   private _emitAuthor(sb: SnippetStringBuilder) {
     if (vs.workspace.getConfiguration().get('comment-ts.includeAuthorTag', false)) {
-      let author: string = vs.workspace.getConfiguration().get('comment-ts.authorName', '');
+      const author: string = vs.workspace.getConfiguration().get('comment-ts.authorName', '');
       sb.append('@author ' + author);
       // sb.appendSnippetTabstop();
       sb.appendLine();
@@ -653,7 +653,7 @@ export class Documenter implements vs.Disposable {
    * // TODO: comment dispose
    * Disposes documenter
    */
-  dispose() {
+  dispose(): void {
     if (this._outputChannel) {
       this._outputChannel.dispose();
     }

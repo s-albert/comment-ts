@@ -1,7 +1,7 @@
 export class StringBuilder {
   private _text = '';
 
-  append(text = '') {
+  append(text = ''): void {
     this._text += text.toString();
   }
 
@@ -10,7 +10,7 @@ export class StringBuilder {
    * Appends line
    * @param [text]
    */
-  appendLine(text = '') {
+  appendLine(text = ''): void {
     this._text += text.toString() + '\n';
   }
 

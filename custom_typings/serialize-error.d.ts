@@ -1,10 +1,10 @@
-declare module SerializeError {
+declare namespace SerializeError {
     export interface serializeError {
         (error: Error): string;
     }
 }
 
 declare module "serialize-error" {
-    var serializeError: SerializeError.serializeError;
+    const serializeError: SerializeError.serializeError;
     export = serializeError;
 }

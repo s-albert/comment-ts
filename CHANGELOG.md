@@ -22,3 +22,6 @@ All notable changes to the "comment-ts" extension will be documented in this fil
 ## [0.7.0] - 2018-09-01
 - generation of getter and setter (including comments)
 
+## [1.0.0] - 2020-10-09
+- refactorings
+

@@ -26,14 +26,14 @@ interface IClass {
 
 const matchers = {
   className: /class\s([a-zA-Z]+)/,
-  readonlyDef: /readonly[\s]([a-zA-Z_$][0-9a-zA-Z_$]*)[\s]?\:[\s]?([\.\<\>\{\}\[\]a-zA-Z_$\s<>,]+)[\=|\;]/,
-  privateDef: /private[\s]_([a-zA-Z_$][0-9a-zA-Z_$]*)[\s]?\:[\s]?([\.\<\>\{\}\[\]a-zA-Z_$\s<>,]+)[\=|\;]/,
-  getMethod: /public[\s]get[\s]?([a-zA-Z_$][0-9a-zA-Z_$]*)[\(\)]+/,
-  setMethod: /public[\s]set[\s]?([a-zA-Z_$][0-9a-zA-Z_$]*)[\(]+[a-zA-Z_$][0-9a-zA-Z_$]*[\s\:]+/
+  readonlyDef: /readonly[\s]([a-zA-Z_$][0-9a-zA-Z_$]*)[\s]?:[\s]?([.<>{}[\]a-zA-Z_$\s<>,]+)[=|;]/,
+  privateDef: /private[\s]_([a-zA-Z_$][0-9a-zA-Z_$]*)[\s]?:[\s]?([.<>{}[]a-zA-Z_$\s<>,]+)[=|;]/,
+  getMethod: /public[\s]get[\s]?([a-zA-Z_$][0-9a-zA-Z_$]*)[()]+/,
+  setMethod: /public[\s]set[\s]?([a-zA-Z_$][0-9a-zA-Z_$]*)[(]+[a-zA-Z_$][0-9a-zA-Z_$]*[\s:]+/
 };
 
 // generate multiple line, can't call vscode.window.activeTextEditor.edit(builder => {}) serveral time by command, don't know why
-export function generateAllGetterAndSetter(classesListGetter, classesListSetter) {
+export function generateAllGetterAndSetter(classesListGetter: IClass[], classesListSetter: IClass[]): void {
   const currentPos = new vs.Position(vs.window.activeTextEditor.selection.active.line, 0);
 
   let totalString = '';
@@ -52,8 +52,8 @@ export function generateAllGetterAndSetter(classesListGetter, classesListSetter)
 }
 
 // generate a list of pickable items based on EType
-export function quickPickItemListFrom(classes: IClass[], type: EType): vs.QuickPickItem[] {
-  let quickPickItemList: vs.QuickPickItem[] = [];
+export function quickPickItemListFrom(classes: IClass[]): vs.QuickPickItem[] {
+  const quickPickItemList: vs.QuickPickItem[] = [];
   for (let i = 0; i < classes.length; i++) {
     for (let j = 0; j < classes[i].vars.length; j++) {
       quickPickItemList.push(<vs.QuickPickItem>{
@@ -68,8 +68,8 @@ export function quickPickItemListFrom(classes: IClass[], type: EType): vs.QuickP
 
 // scan the current active text window and construct an IClass array
 export function generateClassesList(type: EType): IClass[] {
-  let classes: IClass[] = [];
-  let brackets = {
+  const classes: IClass[] = [];
+  const brackets = {
     name: null,
     within: false,
     open: 0,
@@ -86,7 +86,7 @@ export function generateClassesList(type: EType): IClass[] {
     // when it does we are now within a class def and we can start checking for private variables
     if (!brackets.within && line.text.indexOf('class') !== -1) {
       brackets.within = true;
-      let matches = line.text.match(matchers.className);
+      const matches = line.text.match(matchers.className);
       if (matches) {
         brackets.name = matches[1];
       }
@@ -104,7 +104,7 @@ export function generateClassesList(type: EType): IClass[] {
     // within brackets start matching each line for a private variable
     // and add them to the corresponding IClass
     if (brackets.within) {
-      let _class = getClass(classes, brackets.name);
+      const _class = getClass(classes, brackets.name);
       const matches = {
         privateDef: line.text.match(matchers.privateDef),
         readonlyDef: line.text.match(matchers.readonlyDef),
@@ -201,13 +201,13 @@ function publicName(fname: string) {
 }
 
 // generate code lines into the current active window based on EType
-export function generateCode(classes: IClass[], type: EType, pickedItem?: vs.QuickPickItem) {
+export function generateCode(classes: IClass[], type: EType, pickedItem?: vs.QuickPickItem): void {
   const currentPos = new vs.Position(vs.window.activeTextEditor.selection.active.line, 0);
   if ((type !== EType.CONSTRUCTOR && type !== EType.INTERFACE) && pickedItem) {
     const _class = getClass(classes, pickedItem.description);
     if (_class) {
       for (let i = 0; i < _class.vars.length; i++) {
-        let item = _class.vars[i];
+        const item = _class.vars[i];
         if (item && pickedItem.label === item.name) {
           vs.window.activeTextEditor.edit((builder) => {
             // add template code blocks before the cursor position's line number
@@ -242,8 +242,8 @@ export function generateCode(classes: IClass[], type: EType, pickedItem?: vs.Qui
   }
 }
 
-function createConstructor(thisClass: IClass) {
-  let items = thisClass.reads;
+function createConstructor(thisClass: IClass): string {
+  const items = thisClass.reads;
   let c = `\n\t/**`;
   c += `\n\t* Creates an instance of ${thisClass.name}.`;
   c += `\n\t* @param ${thisClass.name} object (e.g. dto) to initialize the model, including:`;
@@ -265,8 +265,8 @@ function createConstructor(thisClass: IClass) {
   return c;
 }
 
-function createInterface(thisClass: IClass) {
-  let items = thisClass.reads;
+function createInterface(thisClass: IClass): string {
+  const items = thisClass.reads;
   let c = `\n\t/**`;
   c += `\n\t* Interface with readonly fields of ${thisClass.name}.`;
   c += `\n\t*/`;
@@ -280,7 +280,7 @@ function createInterface(thisClass: IClass) {
   return c;
 }
 
-function createGetter(item: IVar) {
+function createGetter(item: IVar): string {
   return (
     '\n    /**\n     * Getter ' +
     item.figure +
@@ -297,7 +297,7 @@ function createGetter(item: IVar) {
   );
 }
 
-function createSetter(item: IVar) {
+function createSetter(item: IVar): string {
   return (
     '\n    /**\n     * Setter ' +
     item.figure +

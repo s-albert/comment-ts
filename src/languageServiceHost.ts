@@ -1,13 +1,9 @@
 import * as ts from 'typescript';
 
 export class LanguageServiceHost implements ts.LanguageServiceHost {
-  private _files: ts.Map<{ text: string; version: number }>;
+  private _files: ts.Map<{ text: string; version: number }> = <ts.Map<{ text: string; version: number }>>{};
 
-  constructor() {
-    this._files = <any>{};
-  }
-
-  updateCurrentFile(fileName: string, fileText: string) {
+  updateCurrentFile(fileName: string, fileText: string): void {
     for (const existingFileName in this._files) {
       delete this._files[existingFileName].text;
     }
@@ -20,7 +16,7 @@ export class LanguageServiceHost implements ts.LanguageServiceHost {
     }
   }
 
-  getScriptFileNames() {
+  getScriptFileNames(): string[] {
     return Object.keys(this._files);
   }
 
@@ -34,29 +30,29 @@ export class LanguageServiceHost implements ts.LanguageServiceHost {
     return this._files[fileName] && this._files[fileName].version.toString();
   }
 
-  getScriptSnapshot(fileName: string) {
+  getScriptSnapshot(fileName: string): ts.IScriptSnapshot {
     return ts.ScriptSnapshot.fromString(this._files[fileName] ? this._files[fileName].text : '');
   }
 
-  getCurrentDirectory() {
+  getCurrentDirectory(): string {
     return process.cwd();
   }
 
-  getDefaultLibFileName(options: ts.CompilerOptions) {
+  getDefaultLibFileName(options: ts.CompilerOptions): string {
     return ts.getDefaultLibFilePath(options);
   }
 
   getCompilationSettings(): ts.CompilerOptions {
     return {
-      allowJs: true
+      allowJs: true,
     };
   }
 
-  getSourceFile(fileName: string, languageVersion: ts.ScriptTarget, onError?: (message: string) => void) {
-    if (!this._files[fileName]) {
-      return;
+  getSourceFile(fileName: string): ts.SourceFile | undefined {
+    if (this._files[fileName]) {
+      return ts.createSourceFile(fileName, this._files[fileName].text, ts.ScriptTarget.Latest);
+    } else {
+      return undefined;
     }
-
-    return ts.createSourceFile(fileName, this._files[fileName].text, ts.ScriptTarget.Latest);
   }
 }

@@ -4,41 +4,38 @@ import * as vs from 'vscode';
 export class SnippetStringBuilder {
   private readonly _snippet = new vs.SnippetString();
 
-  append(value: string) {
+  append(value: string): this {
     this._snippet.appendText(value.toString());
 
     return this;
   }
 
-  appendLine(value: string = '') {
+  appendLine(value = ''): this {
     this.append(value.toString() + '\n');
     return this;
   }
 
-  appendSnippetTabstop(index?: number) {
+  appendSnippetTabstop(index?: number): this {
     this._snippet.appendTabstop(index);
 
     return this;
   }
 
-  appendSnippetPlaceholder(value: string | ((snippet: vs.SnippetString) => any), index?: number) {
+  appendSnippetPlaceholder(value: string | ((snippet: vs.SnippetString) => this), index?: number): this {
     this._snippet.appendPlaceholder(value, index);
 
     return this;
   }
 
-  appendSnippetVariable(name: string, defaultValue: string | ((snippet: vs.SnippetString) => any)) {
+  appendSnippetVariable(name: string, defaultValue: string | ((snippet: vs.SnippetString) => this)): this {
     this._snippet.appendVariable(name, defaultValue);
 
     return this;
   }
 
-  toCommentValue(updateWithMap = false) {
-    let sb = new StringBuilder();
+  toCommentValue(): vs.SnippetString {
+    const sb = new StringBuilder();
 
-    // if (!updateWithMap) {
-    //   sb.appendLine();
-    // }
     sb.appendLine('/**');
 
     const lines = this._snippet.value.split('\n');

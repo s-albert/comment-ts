@@ -34,7 +34,6 @@ function runCommand(commandName: string, document: vs.TextDocument, implFunc: ()
     lazyInitializeDocumenter();
     implFunc();
   } catch (e) {
-    debugger;
     console.error(e);
   }
 }
@@ -67,7 +66,7 @@ export function activate(context: vs.ExtensionContext): void {
     vs.languages.registerCompletionItemProvider(
       progLanguages,
       {
-        provideCompletionItems: (document: vs.TextDocument, position: vs.Position, token: vs.CancellationToken) => {
+        provideCompletionItems: (document: vs.TextDocument, position: vs.Position) => {
           const line = document.lineAt(position.line).text;
           const prefix = line.slice(0, position.character);
 
@@ -110,7 +109,7 @@ export function activate(context: vs.ExtensionContext): void {
   context.subscriptions.push(
     vs.commands.registerCommand('comment-ts.getter', function() {
       const classesListGetter = generateClassesList(EType.GETTER);
-      vs.window.showQuickPick(quickPickItemListFrom(classesListGetter, EType.GETTER)).then((pickedItem) => {
+      vs.window.showQuickPick(quickPickItemListFrom(classesListGetter)).then((pickedItem) => {
         generateCode(classesListGetter, EType.GETTER, pickedItem);
       });
     })
@@ -118,7 +117,7 @@ export function activate(context: vs.ExtensionContext): void {
   context.subscriptions.push(
     vs.commands.registerCommand('comment-ts.setter', function() {
       const classesListSetter = generateClassesList(EType.SETTER);
-      vs.window.showQuickPick(quickPickItemListFrom(classesListSetter, EType.SETTER)).then((pickedItem) => {
+      vs.window.showQuickPick(quickPickItemListFrom(classesListSetter)).then((pickedItem) => {
         generateCode(classesListSetter, EType.SETTER, pickedItem);
       });
     })
@@ -133,7 +132,7 @@ export function activate(context: vs.ExtensionContext): void {
   context.subscriptions.push(
     vs.commands.registerCommand('comment-ts.getterAndSetter', function() {
       const classesListBoth = generateClassesList(EType.BOTH);
-      vs.window.showQuickPick(quickPickItemListFrom(classesListBoth, EType.BOTH)).then((pickedItem) => {
+      vs.window.showQuickPick(quickPickItemListFrom(classesListBoth)).then((pickedItem) => {
         generateCode(classesListBoth, EType.BOTH, pickedItem);
       });
     })
