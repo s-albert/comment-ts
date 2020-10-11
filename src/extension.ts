@@ -34,55 +34,12 @@ function runCommand(commandName: string, document: vs.TextDocument, implFunc: ()
     lazyInitializeDocumenter();
     implFunc();
   } catch (e) {
+    debugger;
     console.error(e);
   }
 }
 
-function regCommand(commandName: string, implFunc: () => void): vs.Disposable {
-  try {
-    return vs.commands.registerCommand(commandName, implFunc);
-  } catch (e) {
-    console.error(`${commandName}: ${e}`);
-  }
-}
-
-function regCommentThis(): vs.Disposable {
-  try {
-    return vs.commands.registerCommand('comment-ts.commentThis', (forCompletion: boolean) => {
-      const commandName = 'Comment...';
-
-      runCommand(commandName, vs.window.activeTextEditor.document, () => {
-        documenter.commentThis(vs.window.activeTextEditor, commandName, forCompletion);
-      });
-    });
-  } catch (e) {
-    console.error(`commentThis: ${e}`);
-  }
-}
-
-function regCompletionProvider(): vs.Disposable {
-  try {
-    return vs.languages.registerCompletionItemProvider(
-      progLanguages,
-      {
-        provideCompletionItems: (document: vs.TextDocument, position: vs.Position) => {
-          const line = document.lineAt(position.line).text;
-          const prefix = line.slice(0, position.character);
-
-          if (prefix.match(/^\s*$|\/\*\*\s*$|^\s*\/\*\*+\s*$/)) {
-            return [new DocThisCompletionItem(document, position)];
-          } else {
-            return;
-          }
-        },
-      },
-      '*'
-    );
-  } catch (e) {
-    console.error(`Completion Provider: ${e}`);
-  }
-}
-
+// Thanks, @mjbvz!
 class DocThisCompletionItem extends vs.CompletionItem {
   constructor(document: vs.TextDocument, position: vs.Position) {
     super('/** Comment... */', vs.CompletionItemKind.Snippet);
@@ -99,67 +56,91 @@ class DocThisCompletionItem extends vs.CompletionItem {
     this.command = {
       title: 'Comment...',
       command: 'comment-ts.commentThis',
-      arguments: [true],
+      arguments: [true]
     };
   }
 }
 
 export function activate(context: vs.ExtensionContext): void {
-  context.subscriptions.push(regCompletionProvider());
 
   context.subscriptions.push(
-    regCommand('comment-ts.constructor', () => () => {
+    vs.languages.registerCompletionItemProvider(
+      progLanguages,
+      {
+        provideCompletionItems: (document: vs.TextDocument, position: vs.Position, token: vs.CancellationToken) => {
+          const line = document.lineAt(position.line).text;
+          const prefix = line.slice(0, position.character);
+
+          if (prefix.match(/^\s*$|\/\*\*\s*$|^\s*\/\*\*+\s*$/)) {
+            return [new DocThisCompletionItem(document, position)];
+          }
+
+          return;
+        }
+      },
+      '/',
+      '*'
+    )
+  );
+
+  context.subscriptions.push(
+    vs.commands.registerCommand('comment-ts.constructor', () => {
+      const classesListBoth = generateClassesList(EType.BOTH);
+      generateCode(classesListBoth, EType.CONSTRUCTOR);
+    })
+  );
+
+  context.subscriptions.push(
+    vs.commands.registerCommand('comment-ts.interface', () => {
       const classesListBoth = generateClassesList(EType.BOTH);
       generateCode(classesListBoth, EType.INTERFACE);
     })
   );
 
   context.subscriptions.push(
-    regCommand('comment-ts.interface', () => {
-      const classesListBoth = generateClassesList(EType.BOTH);
-      generateCode(classesListBoth, EType.INTERFACE);
+    vs.commands.registerCommand('comment-ts.commentThis', (forCompletion: boolean) => {
+      const commandName = 'Comment...';
+
+      runCommand(commandName, vs.window.activeTextEditor.document, () => {
+        documenter.commentThis(vs.window.activeTextEditor, commandName, forCompletion);
+      });
     })
   );
 
-  context.subscriptions.push(regCommentThis());
-
   context.subscriptions.push(
-    regCommand('comment-ts.getter', () => {
+    vs.commands.registerCommand('comment-ts.getter', function() {
       const classesListGetter = generateClassesList(EType.GETTER);
-      vs.window.showQuickPick(quickPickItemListFrom(classesListGetter)).then((pickedItem) => {
+      vs.window.showQuickPick(quickPickItemListFrom(classesListGetter, EType.GETTER)).then((pickedItem) => {
         generateCode(classesListGetter, EType.GETTER, pickedItem);
       });
     })
   );
-
   context.subscriptions.push(
-    regCommand('comment-ts.setter', () => {
+    vs.commands.registerCommand('comment-ts.setter', function() {
       const classesListSetter = generateClassesList(EType.SETTER);
-      vs.window.showQuickPick(quickPickItemListFrom(classesListSetter)).then((pickedItem) => {
+      vs.window.showQuickPick(quickPickItemListFrom(classesListSetter, EType.SETTER)).then((pickedItem) => {
         generateCode(classesListSetter, EType.SETTER, pickedItem);
       });
     })
   );
-
   context.subscriptions.push(
-    regCommand('comment-ts.allGetterAndSetter', () => {
+    vs.commands.registerCommand('comment-ts.allGetterAndSetter', function() {
       const classesListGetter = generateClassesList(EType.GETTER);
       const classesListSetter = generateClassesList(EType.SETTER);
       generateAllGetterAndSetter(classesListGetter, classesListSetter);
     })
   );
-
   context.subscriptions.push(
-    regCommand('comment-ts.getterAndSetter', () => {
+    vs.commands.registerCommand('comment-ts.getterAndSetter', function() {
       const classesListBoth = generateClassesList(EType.BOTH);
-      vs.window.showQuickPick(quickPickItemListFrom(classesListBoth)).then((pickedItem) => {
+      vs.window.showQuickPick(quickPickItemListFrom(classesListBoth, EType.BOTH)).then((pickedItem) => {
         generateCode(classesListBoth, EType.BOTH, pickedItem);
       });
     })
   );
 
   context.subscriptions.push(
-    regCommand('comment-ts.traceTypeScriptSyntaxNode', () => {
+    vs.commands.registerCommand('comment-ts.traceTypeScriptSyntaxNode', () => {
       const commandName = 'Trace Typescript Syntax Node';
 
       runCommand(commandName, vs.window.activeTextEditor.document, () => {

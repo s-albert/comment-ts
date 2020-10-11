@@ -35,7 +35,7 @@ export function indexOfBlank(s: string, pos = 0): number {
 function addToMap(tag: string, lineText: string, map: Map<string, string>): boolean {
   const index = lineText.indexOf(tag);
   if (index > 0) {
-    const parse = lineText.substring(index + tag.length);
+    let parse = lineText.substring(index + tag.length);
     map.set(tag, parse.trim());
     return true;
   } else {
@@ -97,7 +97,13 @@ export function createMap(editor: vs.TextEditor, selection: vs.Selection): Map<s
   return map;
 }
 
-export function getDocumentFileName(document: vs.TextDocument): string {
+export function emptyArray(arr: any[]) {
+  while (arr.length > 0) {
+    arr.pop();
+  }
+}
+
+export function getDocumentFileName(document: vs.TextDocument) {
   // Fix directory delimiters
   const fileName = fixWinPath(document.fileName);
 
@@ -110,7 +116,7 @@ export function getDocumentFileName(document: vs.TextDocument): string {
   return ts.sys.useCaseSensitiveFileNames ? adjustedFileName.toLowerCase() : adjustedFileName;
 }
 
-export function fixWinPath(filePath: string): string {
+export function fixWinPath(filePath: string) {
   if (path.sep === '\\') {
     return filePath.replace(/\\/g, '/');
   }
@@ -177,9 +183,9 @@ export function trimUnderscores(str: string): string {
  * @param [cut]
  * @returns
  */
-export function separateCamelcase(str: string, cut = 0): string[] {
+export function separateCamelcase(str: string, cut: number = 0): string[] {
   const x = separateCamelcaseString(str, ';');
-  const result = x.split(';');
+  let result = x.split(';');
   if (cut > 0) {
     result.splice(0, cut);
   }
@@ -225,8 +231,8 @@ export function findChildForPosition(node: ts.Node, position: number): ts.Node {
 }
 
 export function findFirstChildOfKindDepthFirst(node: ts.Node, kinds = supportedNodeKinds): ts.Node {
-  const children = node.getChildren();
-  for (const c of children) {
+  let children = node.getChildren();
+  for (let c of children) {
     if (nodeIsOfKind(c, kinds)) {
       return c;
     }
@@ -240,7 +246,7 @@ export function findFirstChildOfKindDepthFirst(node: ts.Node, kinds = supportedN
   return null;
 }
 
-export function findChildrenOfKind(node: ts.Node, kinds = supportedNodeKinds): ts.Node[] {
+export function findChildrenOfKind(node: ts.Node, kinds = supportedNodeKinds) {
   let children: ts.Node[] = [];
 
   node.getChildren().forEach((c) => {
@@ -260,7 +266,7 @@ export function findChildrenOfKind(node: ts.Node, kinds = supportedNodeKinds): t
  * @param node
  * @returns
  */
-export function findNonVoidReturnInCurrentScope(node: ts.Node): ts.ReturnStatement {
+export function findNonVoidReturnInCurrentScope(node: ts.Node) {
   let returnNode: ts.ReturnStatement;
 
   const children = node.getChildren();
@@ -273,7 +279,7 @@ export function findNonVoidReturnInCurrentScope(node: ts.Node): ts.ReturnStateme
     }
   }
 
-  for (const child of children) {
+  for (let child of children) {
     if (
       child.kind === ts.SyntaxKind.FunctionDeclaration ||
       child.kind === ts.SyntaxKind.FunctionExpression ||
@@ -298,8 +304,8 @@ export function findNonVoidReturnInCurrentScope(node: ts.Node): ts.ReturnStateme
  * @param [kinds]
  * @returns
  */
-export function findVisibleChildrenOfKind(node: ts.Node, kinds = supportedNodeKinds): ts.Node[] {
-  const children = findChildrenOfKind(node, kinds);
+export function findVisibleChildrenOfKind(node: ts.Node, kinds = supportedNodeKinds) {
+  let children = findChildrenOfKind(node, kinds);
 
   return children.filter((child) => {
     if (child.modifiers && child.modifiers.find((m) => m.kind === ts.SyntaxKind.PrivateKeyword)) {
@@ -320,11 +326,11 @@ export function findVisibleChildrenOfKind(node: ts.Node, kinds = supportedNodeKi
   });
 }
 
-export function nodeIsOfKind(node: ts.Node, kinds = supportedNodeKinds): boolean {
+export function nodeIsOfKind(node: ts.Node, kinds = supportedNodeKinds) {
   return !!node && !!kinds.find((k) => node.kind === k);
 }
 
-export function findFirstParent(node: ts.Node, kinds = supportedNodeKinds): ts.Node | null {
+export function findFirstParent(node: ts.Node, kinds = supportedNodeKinds) {
   let parent = node.parent;
   while (parent) {
     if (nodeIsOfKind(parent, kinds)) {
@@ -337,7 +343,7 @@ export function findFirstParent(node: ts.Node, kinds = supportedNodeKinds): ts.N
   return null;
 }
 
-export function formatTypeName(typeName: string): string {
+export function formatTypeName(typeName: string) {
   typeName = typeName.trim();
 
   if (typeName === '') {
