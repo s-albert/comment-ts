@@ -2,7 +2,7 @@
   "name": "comment-ts",
   "displayName": "Comments in Typescript",
   "description": "Generates JSDoc comments in TypeScript files.",
-  "version": "0.9.11",
+  "version": "1.0.7",
   "publisher": "salbert",
   "scripts": {
     "vscode:prepublish": "npm run compile",
