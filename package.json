@@ -2,7 +2,7 @@
   "name": "comment-ts",
   "displayName": "Comments in Typescript",
   "description": "Generates JSDoc comments in TypeScript files.",
-  "version": "1.0.15",
+  "version": "1.0.20",
   "publisher": "salbert",
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -135,9 +135,9 @@
   "devDependencies": {
     "@types/node": "^10.12.18",
     "vscode": "^1.1.26",
-    "@typescript-eslint/eslint-plugin": "^4.4.0",
-    "@typescript-eslint/parser": "^4.4.0",
-    "eslint": "^7.10.0"
+    "@typescript-eslint/eslint-plugin": "^4.4.1",
+    "@typescript-eslint/parser": "^4.4.1",
+    "eslint": "^7.11.0"
   },
   "dependencies": {
     "typescript": "^3.9.7"
