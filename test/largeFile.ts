@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */  // --> OFF
+/* eslint-disable @typescript-eslint/no-empty-function */  // --> OFF
 /**
  * This is a description for the interface.
  *
@@ -4095,6 +4097,4 @@ someFunction7(someParam1: string, someParam2: number): boolean {
     }
 }
 
-const testFunc = () => {
-
-}
+const testFunc = () => {}

@@ -2,14 +2,14 @@
   "name": "comment-ts",
   "displayName": "Comments in Typescript",
   "description": "Generates JSDoc comments in TypeScript files.",
-  "version": "1.0.5",
+  "version": "1.0.20",
   "publisher": "salbert",
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "lint": "node ./node_modules/eslint/bin/eslint src/**/*.ts",
-    "compile": "npm run lint && tsc -p ./",
-    "publish": "vsce publish",
-    "postinstall": "node ./node_modules/vscode/bin/install"
+    "lint": "eslint . --ext .ts,.tsx",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "publish": "vsce publish"
   },
   "icon": "images/icon.png",
   "keywords": [
@@ -24,7 +24,7 @@
   },
   "license": "MIT",
   "engines": {
-    "vscode": "^1.49.0"
+    "vscode": "^1.25.0"
   },
   "categories": [
     "Other",
@@ -32,49 +32,50 @@
     "Snippets"
   ],
   "activationEvents": [
-    "*"
+    "onLanguage:typescript",
+    "onLanguage:typescriptreact"
   ],
   "main": "./out/src/extension",
   "contributes": {
     "commands": [
       {
         "command": "comment-ts.commentThis",
-        "title": "comment-ts: Comment code"
+        "title": "Comment code"
       },
       {
         "command": "comment-ts.getter",
-        "title": "comment-ts: Generate getter of private _"
+        "title": "Generate getter of private _"
       },
       {
         "command": "comment-ts.setter",
-        "title": "comment-ts: Generate setter of private _"
+        "title": "Generate setter of private _"
       },
       {
         "command": "comment-ts.getterAndSetter",
-        "title": "comment-ts: Generate getter and setter of private _"
+        "title": "Generate getter and setter of private _"
       },
       {
         "command": "comment-ts.allGetterAndSetter",
-        "title": "comment-ts: Generate ALL getter and setter of private _"
+        "title": "Generate ALL getter and setter of private _"
       },
       {
         "command": "comment-ts.constructor",
-        "title": "comment-ts: Generate constructor with initialization of readonly fields"
+        "title": "Generate constructor with initialization of readonly fields"
       },
       {
         "command": "comment-ts.interface",
-        "title": "comment-ts: Generate interface of readonly fields"
+        "title": "Generate interface of readonly fields"
       },
       {
         "command": "comment-ts.traceTypeScriptSyntaxNode",
-        "title": "comment-ts: Trace typeScript syntax node"
+        "title": "Trace typeScript syntax node"
       }
     ],
     "menus": {
       "editor/context": [
         {
           "command": "comment-ts.commentThis",
-          "when": "editorLangId == typescript"
+          "when": "editorLangId == typescript || editorLangId == typescriptreact"
         }
       ]
     },
@@ -132,15 +133,15 @@
     }
   },
   "devDependencies": {
-    "@types/node": "^10.17.39",
-    "@typescript-eslint/eslint-plugin": "^4.4.0",
-    "@typescript-eslint/parser": "^4.4.0",
-    "eslint": "^7.11.0",
-    "typescript": "^3.9.7",
-    "vscode": "1.1.37",
-    "yarn": "^1.22.10"
+    "@types/node": "^10.12.18",
+    "vscode": "^1.1.26",
+    "@typescript-eslint/eslint-plugin": "^4.4.1",
+    "@typescript-eslint/parser": "^4.4.1",
+    "eslint": "^7.11.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "typescript": "^3.9.7"
+  },
   "bugs": {
     "url": "https://github.com/s-albert/comment-ts/issues"
   },
