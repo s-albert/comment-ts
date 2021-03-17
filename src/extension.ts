@@ -1,6 +1,6 @@
 import * as vs from 'vscode';
+import { EType, generateAllGetterAndSetter, generateClassesList, generateCode, quickPickItemListFrom } from './codegen';
 import { Documenter } from './documenter';
-import { generateClassesList, EType, generateCode, quickPickItemListFrom, generateAllGetterAndSetter } from './codegen';
 
 const progLanguages = ['typescript', 'typescriptreact'];
 
@@ -108,9 +108,9 @@ export function activate(context: vs.ExtensionContext): void {
   context.subscriptions.push(regCompletionProvider());
 
   context.subscriptions.push(
-    regCommand('comment-ts.constructor', () => () => {
+    regCommand('comment-ts.constructor', () => {
       const classesListBoth = generateClassesList(EType.BOTH);
-      generateCode(classesListBoth, EType.INTERFACE);
+      generateCode(classesListBoth, EType.CONSTRUCTOR);
     })
   );
 
